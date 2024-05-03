@@ -37,7 +37,7 @@ coerce_shape <- function(df, change = TRUE) {
 
 
 
-#' Creates Key to Harmonized Adm. Units
+#' Creates Key of Harmonized Adm. Units
 #'
 #' @description
 #' Takes the data frames created by `?status_quo`  and `?gather_change`, returns a key that maps each identifier
