@@ -47,9 +47,9 @@ status_quo <- function(type ,from , to) {
 
     date_qry <- list(from = dateFrom, to = dateTo)
 
-    koReg <- httr2::request(Url_qry) %>%
-      httr2::req_url_query(!!!date_qry) %>%
-      httr2::req_retry(max_tries = 5) %>%
+    koReg <- httr2::request(Url_qry) |>
+      httr2::req_url_query(!!!date_qry) |>
+      httr2::req_retry(max_tries = 5) |>
       httr2::req_perform()
 
     chgDT <- koReg %>% httr2::resp_body_json(simplifyDataFrame = TRUE)
@@ -60,9 +60,9 @@ status_quo <- function(type ,from , to) {
     # Coerce into the desired shape and encoding
     if (type == "grunnkrets") {
 
-    chgDT <- chgDT %>%
-      filter(codes.level == 2) %>%
-      mutate(
+    chgDT <- chgDT |>
+      dplyr::filter(codes.level == 2) |>
+      dplyr::mutate(
         geoID = as.integer(codes.code),
         name = as.character(codes.name),
         from = as.integer(substr(codes.validFromInRequestedRange, 0 , 4)),
@@ -75,8 +75,8 @@ status_quo <- function(type ,from , to) {
 
     } else if (type == "kommune") {
 
-      chgDT <- chgDT %>%
-        mutate(
+      chgDT <- chgDT |>
+        dplyr::mutate(
           geoID = as.integer(codes.code),
           name = as.character(codes.name),
           from = as.integer(substr(codes.validFromInRequestedRange, 0 , 4)),
@@ -92,18 +92,18 @@ status_quo <- function(type ,from , to) {
 
   # Ensure that each ID can only be observed once per year
   outDAT <- outDAT %>%
-    filter(from != to) %>%
-    group_by(to) %>%
-    distinct(geoID, name , .keep_all = TRUE) %>%
-    ungroup()
+    dplyr::filter(from != to) |>
+    dplyr::group_by(to) %>%
+    dplyr::distinct(geoID, name , .keep_all = TRUE) |>
+    dplyr::ungroup()
 
   # Ensure that Codes for "Unknown Statistical Unit" are removed
-  outDAT <- outDAT %>%
-    mutate(
+  outDAT <- outDAT |>
+    dplyr::mutate(
       # Identify the Unspecified ones and remove them as they are not part of an actual cluster
       end_9 = ifelse(grepl("9999$", as.character(geoID)), 1, 0)
     ) %>%
-    filter(end_9 != 1) %>%
+    dplyr::filter(end_9 != 1) |>
     dplyr::select(-end_9)
 
   return(outDAT)

@@ -145,19 +145,19 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
 
 
   if (nrow(data_frame) != 0) {
-    data_frame <- data_frame %>%
-      mutate(
+    data_frame <- data_frame |>
+      dplyr::mutate(
         year = as.Date(year, format = "%Y")
       )
   }
 
   delCol <- c("oldShortName", "newShortName")
-  data_frame <- data_frame %>%
-    select(-delCol)
+  data_frame <- data_frame |>
+    dplyr::select(-delCol)
 
 
-  data_frame <- data_frame %>%
-    mutate(
+  data_frame <- data_frame |>
+    dplyr::mutate(
       year = as.integer(year)
     )
 
@@ -170,25 +170,25 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
                   grunnkrets = "Grunnkrets (BSU)"
   )
 
-  Chg_Type <- data_frame %>%
-    mutate(
+  Chg_Type <- data_frame |>
+    dplyr::mutate(
       from = as.integer(from),
       to = as.integer(to)
     ) %>%
-    group_by(from, year) %>%
-    mutate(
+    dplyr::group_by(from, year) |>
+    dplyr::mutate(
       n_from = n(),
       dist_from_from = n_distinct(from),
       dist_to_from   = n_distinct(to)
     )  %>%
-    group_by(to , year) %>%
-    mutate(
+    dplyr::group_by(to , year) |>
+    dplyr::mutate(
       n_to = n(),
       dist_from_to = n_distinct(from),
       dist_to_to = n_distinct(to)
     ) %>%
-    ungroup() %>%
-    mutate(
+    dplyr::ungroup() |>
+    dplyr::mutate(
       OtO = ifelse(n_from == 1 & n_to == 1, 1, 0),
       Split = ifelse(dist_from_from == 1 & dist_to_from > 1 , 1, 0),
       Merger = ifelse(dist_from_to  > 1 & dist_to_to == 1, 1, 0)

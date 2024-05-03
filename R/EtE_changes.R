@@ -18,7 +18,7 @@ coerce_shape <- function(df, change = TRUE) {
 
     df <- df %>%
       dplyr::select(from, to, oldName , newName , year) %>%
-      mutate(
+      dplyr::mutate(
         from = as.integer(from),
         to = as.integer(to),
         year = as.integer(year)
@@ -27,7 +27,7 @@ coerce_shape <- function(df, change = TRUE) {
   } else {
 
     df <- df %>%
-      mutate(
+      dplyr::mutate(
         geoID = as.integer(geoID)
       )
   }
@@ -73,13 +73,13 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
     df_change <- coerce_shape(df_change, change = TRUE)
     # Filter based on paramter 'to' and NOT the variable 'to'
     df_status <- coerce_shape(df_status, change = FALSE) %>%
-      filter(from <= ({{to}}-1))
+      dplyr::filter(from <= ({{to}}-1))
 
     # Handle Case of no changes - in such a period the key is equal to the status
     if (nrow(df_change) != 0) {
 
       # Use the undirected networks to identify the clusters of mergers/splits
-      graph <- graph_from_data_frame(df_change, directed = FALSE , vertices = NULL)
+      graph <- igraph::graph_from_data_frame(df_change, directed = FALSE , vertices = NULL)
       clusters <- igraph::components(graph, mode = c("strong"))
 
 
@@ -92,17 +92,17 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
         cluster = clusters$membership,
         row.names = NULL
       ) %>%
-        mutate(
+        dplyr::mutate(
           cluster_id = as.integer(1*10^5+cluster)
         ) %>%
         dplyr::select(-cluster) %>%
-        distinct()
+        dplyr::distinct()
 
 
 
-      EtE_key <- left_join(df_status , df_members, join_by("geoID" == "name"))
+      EtE_key <- dplyr::left_join(df_status , df_members, dplyr::join_by("geoID" == "name"))
       EtE_key <- EtE_key %>%
-        mutate(
+        dplyr::mutate(
           cluster_id = ifelse(is.na(cluster_id) , geoID , cluster_id ),
           year = from
         ) %>%
@@ -112,7 +112,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
       # This else statement refers to an empty df_change dataframe, in periods with no change
       EtE_key <- df_status %>%
-        mutate(
+        dplyr::mutate(
           geoID = geoID,
           name = name,
           cluster_id = geoID,
@@ -123,7 +123,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
     }
 
     EtE_key <- EtE_key %>%
-      arrange(year)
+      dplyr::arrange(year)
 
   }
 
@@ -133,9 +133,9 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
     df_change_bsu <- coerce_shape(nrow_find(df_change , max = TRUE), change = TRUE)
     df_change_mun <- coerce_shape(nrow_find(df_change , max = FALSE), change = TRUE)
     df_status_bsu <- coerce_shape(nrow_find(df_status , max = TRUE), change = FALSE) %>%
-      filter(from <= ({{to}}-1))
+      dplyr::filter(from <= ({{to}}-1))
     df_status_mun <- coerce_shape(nrow_find(df_status , max = FALSE), change = FALSE) %>%
-      filter(from <= ({{to}}-1))
+      dplyr::filter(from <= ({{to}}-1))
 
 
     # Handle period of no change in either BSU or municipality codes
@@ -143,7 +143,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
     if (nrow(df_change_bsu) == 0) {
 
       EtE_key_bsu <- df_status_bsu %>%
-        mutate(
+        dplyr::mutate(
           geoID = geoID,
           # Name and code have to be labelled for grunnkrets and municipalities
           Gname = name,
@@ -155,7 +155,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
     } else {
 
       # Use the undirected networks to identify the clusters of mergers/splits
-      graph_bsu <- graph_from_data_frame(df_change_bsu, directed = FALSE , vertices = NULL)
+      graph_bsu <- igraph::graph_from_data_frame(df_change_bsu, directed = FALSE , vertices = NULL)
       clusters_bsu <- igraph::components(graph_bsu, mode = c("strong"))
 
       df_members_bsu <- data.frame(
@@ -163,15 +163,15 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
         cluster = clusters_bsu$membership,
         row.names = NULL
       ) %>%
-        mutate(
+        dplyr::mutate(
           Gcluster_id = as.integer(1*10^5+cluster)
         ) %>%
         dplyr::select(-cluster) %>%
-        distinct()
+        dplyr::distinct()
 
       EtE_key_bsu <- left_join(df_status_bsu , df_members_bsu, join_by("geoID" == "Gname"))
       EtE_key_bsu <- EtE_key_bsu %>%
-        mutate(
+        dplyr::mutate(
           Gcluster_id = ifelse(is.na(Gcluster_id) , geoID , Gcluster_id ),
           Gname = name,
           year = from
@@ -182,7 +182,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
     if (nrow(df_change_mun) == 0) {
 
       EtE_key_mun <- df_status_mun %>%
-        mutate(
+        dplyr::mutate(
           geoID = geoID,
           Cname = name,
           Ccluster_id = geoID,
@@ -192,7 +192,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
     } else {
 
-      graph_mun <- graph_from_data_frame(df_change_mun, directed = FALSE , vertices = NULL)
+      graph_mun <- igraph::graph_from_data_frame(df_change_mun, directed = FALSE , vertices = NULL)
       clusters_mun <- igraph::components(graph_mun, mode = c("strong"))
 
 
@@ -205,15 +205,15 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
         cluster = clusters_mun$membership,
         row.names = NULL
       ) %>%
-        mutate(
+        dplyr::mutate(
           Ccluster_id = as.integer(5*10^5+cluster)
         ) %>%
         dplyr::select(-cluster) %>%
-        distinct()
+        dplyr::distinct()
 
-      EtE_key_mun <- left_join(df_status_mun , df_members_mun, join_by("geoID" == "Cname"))
+      EtE_key_mun <- dplyr::left_join(df_status_mun , df_members_mun, dplyr::join_by("geoID" == "Cname"))
       EtE_key_mun <- EtE_key_mun %>%
-        mutate(
+        dplyr::mutate(
           Ccluster_id = ifelse(is.na(Ccluster_id) , geoID , Ccluster_id ),
           Cname = name,
           year = from
@@ -225,7 +225,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
     ## Merge the two keys into one joint key
 
     EtE_key_bsu <- EtE_key_bsu %>%
-      mutate(
+      dplyr::mutate(
         str_l = as.integer(nchar(geoID)),
         # Municipality id are either the first 3, or 4 digits depending on the length
         # of the municipality code (and thus the length of the entire code)
@@ -235,13 +235,13 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
       dplyr::select(-c(str_l))
 
 
-    EtE_key <- left_join(EtE_key_bsu , EtE_key_mun , join_by("mun_id" == "geoID", "year" == "year"))
+    EtE_key <- dplyr::left_join(EtE_key_bsu , EtE_key_mun , dplyr::join_by("mun_id" == "geoID", "year" == "year"))
 
 
   }
 
   EtE_key <- EtE_key %>%
-    arrange(year)
+    dplyr::arrange(year)
 
   return(EtE_key)
 

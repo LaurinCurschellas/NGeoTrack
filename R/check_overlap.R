@@ -31,11 +31,12 @@ check_overlap <- function(df_key ) {
     dplyr::filter(max_year == year) %>%
     dplyr::select(-c(year, max_year)) %>%
     dplyr::group_by(Gcluster_id) %>%
-    mutate(
+    dplyr::mutate(
       name = c(seq(1,n()))
-    ) %>% ungroup()
+    ) %>%
+    dplyr::ungroup()
 
-  test <- dplyr::pivot_wider(test, names_from = name, values_from = c(Ccluster_id, Cname))
+  test <- tidyr::pivot_wider(test, names_from = name, values_from = c(Ccluster_id, Cname))
 
   # Print the wide-format data frame
   d <- Sys.setlocale(category = "LC_ALL", locale = "en_US.UTF-8") # System has to be able to read the UTF-8 characters
