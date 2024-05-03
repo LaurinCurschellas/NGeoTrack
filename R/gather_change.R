@@ -174,25 +174,25 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
     dplyr::mutate(
       from = as.integer(from),
       to = as.integer(to)
-    ) %>%
+    ) |>
     dplyr::group_by(from, year) |>
     dplyr::mutate(
       n_from = n(),
       dist_from_from = n_distinct(from),
       dist_to_from   = n_distinct(to)
-    )  %>%
+    )  |>
     dplyr::group_by(to , year) |>
     dplyr::mutate(
       n_to = n(),
       dist_from_to = n_distinct(from),
       dist_to_to = n_distinct(to)
-    ) %>%
+    ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
       OtO = ifelse(n_from == 1 & n_to == 1, 1, 0),
       Split = ifelse(dist_from_from == 1 & dist_to_from > 1 , 1, 0),
       Merger = ifelse(dist_from_to  > 1 & dist_to_to == 1, 1, 0)
-    ) %>%
+    ) |>
     dplyr::select(-c(n_from, dist_from_from, dist_to_from, n_to, dist_from_to, dist_to_to))
 
 
