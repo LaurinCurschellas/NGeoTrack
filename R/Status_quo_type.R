@@ -1,3 +1,29 @@
+#' Create Panel of Valid Administrative Identifiers
+#'
+#' @description
+#' Returns a data frame with the full panel of each years' valid administrative identifiers
+#' for the chosen unit-type and time-period.
+#'
+#' The function calls the API of Statistics Norway (SSB) and returns the pre-processed information.
+#'
+#'
+#' @usage status_quo(type = "kommune", from = startYear , to = endYear)
+#'
+#' @param type A string: `"kommune"` or `"grunnkrets"`
+#' @param from An integer: Start year of panel
+#' @param to   An integer: End year of panel
+#'
+#'
+#' @examples
+#' expl <- status_quo(type = "kommune", from = 1999, to = 2018)
+#'
+#' @returns A 'data.frame' object, with four columns `geoID`, `name`, `from`, `to`
+#' \itemize{
+#'   \item `geoID` - current numeric identifier
+#'   \item `name` - current name of adm. unit
+#'   \item `from` - startYear of validity (always year on year)
+#'   \item `to` - endYear
+#' }
 #' @export
 status_quo <- function(type ,from , to) {
 

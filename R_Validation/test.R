@@ -19,4 +19,3 @@ chg_list <- list(change_bsu, change_mun)
 key_joint <- EtE_changes(df_status = stat_list, df_change = chg_list, from = 1999 , to = 2018, jointly = TRUE)
 
 overlap <- check_overlap(key_joint)
-

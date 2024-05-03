@@ -5,17 +5,19 @@
 \alias{shp_bsu_2021}
 \title{Shape File Basic Statistical Units (BSU) of Norway (2021)}
 \format{
-## `shp_bsu_2021`
+\subsection{\code{shp_bsu_2021}}{
+
 A data frame with 14'102 rows and 3 columns:
 \describe{
-  \item{grunnkrets}{BSU Identifier (Not Harmonized)}
-  \item{year}{Year}
-  \item{geometry}{A sfc_Polygon, spacial definition of BSU's}
-  ...
+\item{grunnkrets}{BSU Identifier (Not Harmonized)}
+\item{year}{Year}
+\item{geometry}{A sfc_Polygon, spacial definition of BSU's}
+...
+}
 }
 }
 \source{
-<https://kartkatalog.geonorge.no/>
+\url{https://kartkatalog.geonorge.no/}
 }
 \usage{
 shp_bsu_2021

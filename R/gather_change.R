@@ -33,6 +33,33 @@
 # "year" is the year of the new change taking effect. i.e. starting 02.01.YEAR is
 #  when the changes take effect
 
+
+
+#' Create Panel of Changes to Administrative Identifiers
+#'
+#' @description
+#' Returns a data frame with the all officially reported changes to administrative identifiers,
+#' for the type and time period selected by the user.
+#'
+#' The function calls the API of Statistics Norway (SSB) and returns the pre-processed information.
+#'
+#' @usage gather_change(type = "kommune", from = startYear , to = endYear)
+#'
+#' @param type A string: `"kommune"` or `"grunnkrets"`
+#' @param from An integer: Start year of panel
+#' @param to   An integer: End year of panel
+#'
+#' @examples
+#' expl <- gather_change(type = "kommune", from = 1999, to = 2018)
+#'
+#' @returns A 'data.frame' object, with five columns `from`, `oldName`, `to`, `newName`, `year`
+#' \itemize{
+#'   \item `from` - originating numeric identifier
+#'   \item `oldName` - originating name of adm. unit
+#'   \item `to` - new numeric identifier
+#'   \item `newName` - new name of adm. unit
+#'   \item `year` - year, by which the change is enforced (01. January `year`)
+#' }
 #' @export
 gather_change <- function(type , from , to ) {
 

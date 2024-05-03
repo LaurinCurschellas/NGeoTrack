@@ -35,6 +35,49 @@ coerce_shape <- function(df, change = TRUE) {
   return(df)
 }
 
+
+
+#' Creates Key to Harmonized Adm. Units
+#'
+#' @description
+#' Takes the data frames created by `?status_quo`  and `?gather_change`, returns a key that maps each identifier
+#' to their traceable cluster.
+#'
+#' Clusters are defined as the least common unit which can be uniquely distinguished at any given point in time
+#' from all other adm. units.
+#'
+#' Keys can be generated for each type of adm. unit independently or jointly. The use-case for joint harmonization
+#' can be the need to include fixed-effects of the top-level administrative unit.
+#'
+#'
+#'
+#' @usage EtE_changes(df_status = x, df_change = y , from = startYear, to = endYear, jointly = FALSE)
+#'
+#'
+#' @param df_status A data object: Panel of status (object of type: `data.frame` or `list`)
+#' @param df_change A data object: Panel of changes (object of type: `data.frame` or `list`)
+#' @param from   An integer: Start year of panel
+#' @param to   An integer: End year of panel
+#' @param jointly   A Boolean: Request of harmonizing the types of adm. units jointly. Default `FALSE`.
+#' Important Note: If ` jointly == TRUE ` status and change information have to be supplied as a list.
+#' The function is agnostic to the ordering of the elements in the list.
+#'
+#'
+#' @example man/exmpl_EtE.R
+#'
+#' @returns A 'data.frame' object, with five columns `from`, `oldName`, `to`, `newName`, `year`
+#' \itemize{
+#'   \item `geoID` - original numeric identifier
+#'   \item `name` - name of adm. unit
+#'   \item `cluster_id` - cluster identifier the unit is assigned to
+#'   \item `year` - year of the mapping
+#' }
+#' For joint harmonization the lower level adm. unit is mapped to corresponding
+#' \itemize{
+#'  \item `Gcluster_id` - same-level cluster identifier
+#'  \item `Ccluster_id` - top-level cluster identifier
+#' }
+#'
 #' @export
 EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 

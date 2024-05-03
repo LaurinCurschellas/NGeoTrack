@@ -1,3 +1,34 @@
+#' Identifies Overlapping Administrative Units
+#'
+#' @description
+#' Identifies and reports which (if any) lower-level administrative units overlap the boundaries
+#' of top-level administrative units.
+#'
+#' There identification and adjustment is crucial if the user is interested in top-level fixed effects.
+#' Otherwise a BSU cluster could be assigned to 2 municipalities simoultaniously.
+#'
+#' The function takes any jointly estimated key from `EtE_changes()` and returns a list object.
+#'
+#'
+#' @usage check_overlap(df_key = key_jointly)
+#'
+#' @param df_key A data.frame: Only the joint data.frame from this package can be processed.
+#'
+#'
+#' @example man/empl_ovrlp.R
+#'
+#' @returns A 'list' object, with four 2 elements `candidates`, `details`
+#' \itemize{
+#'   \item `candidates` - a vector with the low-level cluster id that overlap
+#'   \item `details` - a data frame with a detailed overview
+#'   \itemize{
+#'      \item `Gcluster_id` - low-level cluster id that overlaps
+#'      \item `Ccluster_id_1` - First top-level cluster assigned to
+#'      \item `Ccluster_id_2` - Second top-level cluster assigned to
+#'      \item `Cname_1` - name of First top-level cluster
+#'      \item `Cname_2` - name of Second top-level cluster
+#'   }
+#' }
 #' @export
 check_overlap <- function(df_key ) {
 

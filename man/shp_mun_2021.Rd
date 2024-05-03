@@ -5,17 +5,19 @@
 \alias{shp_mun_2021}
 \title{Shape File Municipalities of Norway (2021)}
 \format{
-## `shp_mun_2021`
+\subsection{\code{shp_mun_2021}}{
+
 A data frame with 363 rows and 3 columns:
 \describe{
-  \item{kommune}{Municipality Identifier (Not Harmonized)}
-  \item{year}{Year}
-  \item{geometry}{A sfc_Polygon, spacial definition of municipalities}
-  ...
+\item{kommune}{Municipality Identifier (Not Harmonized)}
+\item{year}{Year}
+\item{geometry}{A sfc_Polygon, spacial definition of municipalities}
+...
+}
 }
 }
 \source{
-<https://kartkatalog.geonorge.no/>
+\url{https://kartkatalog.geonorge.no/}
 }
 \usage{
 shp_mun_2021
