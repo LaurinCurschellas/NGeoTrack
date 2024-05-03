@@ -33,7 +33,7 @@
 # "year" is the year of the new change taking effect. i.e. starting 02.01.YEAR is
 #  when the changes take effect
 
-
+#' @export
 gather_change <- function(type , from , to ) {
 
 # The class is probably defined to the values that the API recognises for each level of administrative unit.

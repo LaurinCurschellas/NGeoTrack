@@ -35,7 +35,7 @@ coerce_shape <- function(df, change = TRUE) {
   return(df)
 }
 
-
+#' @export
 EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
 
