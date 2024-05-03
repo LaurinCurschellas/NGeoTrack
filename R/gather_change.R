@@ -177,15 +177,15 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
     ) |>
     dplyr::group_by(from, year) |>
     dplyr::mutate(
-      n_from = dplyr::n(),
-      dist_from_from = dplyr::n_distinct(from),
-      dist_to_from   = dplyr::n_distinct(to)
+      n_from = n(),
+      dist_from_from = n_distinct(from),
+      dist_to_from   = n_distinct(to)
     )  |>
     dplyr::group_by(to , year) |>
     dplyr::mutate(
-      n_to = dplyr::n(),
-      dist_from_to = dplyr::n_distinct(from),
-      dist_to_to = dplyr::n_distinct(to)
+      n_to = n(),
+      dist_from_to = n_distinct(from),
+      dist_to_to = n_distinct(to)
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
