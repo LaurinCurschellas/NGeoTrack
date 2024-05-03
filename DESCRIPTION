@@ -6,10 +6,7 @@ Authors@R: person("Laurin", "Curschellas", email = "laurin@curschellas.net",
   role = c("aut", "cre"))
 URL: https://github.com/LaurinCurschellas/NGeoTrack
 Maintainer: The package maintainer <laurin@curschellas.net>
-Description: Identifiers of administrative units (municipalities or BSU) are subject to change. Most changes occur because of top-level mergers or splits.
-When the identifiers change over time, it is impossible to cleanly estimate fixed effects or to distinguish between individuals moving vs. simply 
-the identifier changing. 
-  This package harmonizes administrative units into clusters which are uniquely tractable across the whole period, specified by the user. 
+Description: Identifiers of administrative units (municipalities or BSU) are subject to change. Most changes occur because of top-level mergers or splits. When the identifiers change over time, it is impossible to cleanly estimate fixed effects or to distinguish between individuals moving vs. simply the identifier changing.     This package harmonizes administrative units into clusters which are uniquely tractable across the whole period, specified by the user. 
 License: use_mit_license()
 Encoding: UTF-8
 LazyData: true
