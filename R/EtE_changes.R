@@ -1,5 +1,5 @@
 
-
+#' @export
 nrow_find <- function(df_list, max = TRUE) {
 
   index <- ifelse(
@@ -11,7 +11,7 @@ nrow_find <- function(df_list, max = TRUE) {
 
 }
 
-
+#' @export
 coerce_shape <- function(df, change = TRUE) {
 
   if (change) {
