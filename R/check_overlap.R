@@ -15,7 +15,7 @@
 #' @param df_key A data.frame: Only the joint data.frame from this package can be processed.
 #'
 #'
-#' @example man/empl_ovrlp.R
+#' @example man/exmpl_ovrlp.R
 #'
 #' @returns A 'list' object, with four 2 elements `candidates`, `details`
 #' \itemize{
