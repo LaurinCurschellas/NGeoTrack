@@ -1,20 +1,26 @@
 # NGeoTrack 
 
-The Basic Statistical Units (BSU), also referred to as Grunnkrets, are tthe most granular administrative units in the Norway. 
-As of January 2022, there are a total of 14'100 such units. 
+Harmonize Norwegian Administrative-Unit Identifiers across time. 
 
-For anyone - who wants to compare administrative units over time or leverages their identification in a movers' designs - the tractability of the location identifier is of pivotal importance. 
-However, (mainly) due to administrative re-organizations, these identifiers are subject to change. 
+Identifiers of administrative units (municipalities or BSU) are subject to change. Most changes occur because of top-level mergers or splits. 
+Inconsistent identifiers can inhibit the use of simple fixed-effects or make it impossible to distinctly identify movers. 
 
-These functions are designed to ensure tractability, by assigning a stable identifier to each unit over time. We assign all identifiers to the smallest possible cluster (think LCD) that are consistent over the period defined by the user. 
+This package harmonizes administrative units into clusters which are uniquely tractable across the whole period, specified by the user. It assigns new, stable identifiers 
+to each administrative unit, and allows for joint harmonizing of a low- and top-level type of administrative unit. 
 
 ***Important Note***:  The procedure is an extension to, and largely based on the following two repositories. In case you use these functions, make sure to cite the original authors. ~ 
 [Norgeo](https://youtu.be/8bh238ekw3](https://github.com/helseprofil/norgeo)https://github.com/helseprofil/norgeo "@embed"), and [NoRwayGeo](https://github.com/eirikberger/NoRwayGeo "@NoRwayGeo") \
 The official changes and lists of valid location codes are published by Statistics Norway ([SSB](https://www.ssb.no/klass/klassifikasjoner/1 "@SSB"))
 
- **Required packages**: [`dplyr`](https://dplyr.tidyverse.org/ "@dplyr"), [`httr2`](https://httr2.r-lib.org/ "@httr2"),[`igraph`](https://igraph.org/ "@igraph") and [`tidyr`](https://tidyr.tidyverse.org/ "@tidyr")
+## Installation 
+```R 
+# install.packages("devtools") 
+# library(devtools)
+devtools::install_github("https://github.com/LaurinCurschellas/NGeoTrack")
+```
 
- 
+**Dependencies**: [`dplyr`](https://dplyr.tidyverse.org/ "@dplyr"), [`httr2`](https://httr2.r-lib.org/ "@httr2"), and [`igraph`](https://igraph.org/ "@igraph") 
+
 *An application of tractable clusters is described in the [Appendix](Appendix/Appendix.md)*
 
 
@@ -40,15 +46,15 @@ data2 <- status_quo(type = "grunnkrets" , from = 1990 , to = 2022)
 ```R
 EtE_changes(df_status = data2 , df_change = data1 , from = 1990 , to = 2022, jointly = FALSE) 
 ```
-3.1  
-Joint harmonization of BSU and Municipality identifiers: 
-The changes and status quo data sets have to be generated for each type individually, and supplied as a list to `EtE_changes()` - the harmonizing function. 
-```R
-changes_list <- list(changes_bsu, changes_mun) # The order in list is not relevant. 
-status_list <- list(status_bsu, status_mun)
+        3.1  
+        Joint harmonization of BSU and Municipality identifiers: 
+        The changes and status quo data sets have to be generated for each type individually, and supplied as a list to `EtE_changes()` - the harmonizing function. 
+        ```R
+        changes_list <- list(changes_bsu, changes_mun) # The order in list is not relevant. 
+        status_list <- list(status_bsu, status_mun)
 
-EtE_changes(df_status = status_list , df_change = changes_list , from = 1990 , to = 2022, jointly = TRUE) 
-```
+        EtE_changes(df_status = status_list , df_change = changes_list , from = 1990 , to = 2022, jointly = TRUE) 
+        ```
 
 4. [`check_overlap()`](https://github.com/LaurinCurschellas/NGeoTrack/blob/main/R/check_overlap.R "@Overlap") 
 This function analyses the generated key and returns information on BSU-clusters that overlap the borders of municipality clusters. 
@@ -70,54 +76,13 @@ head(overlap$details)
 ```
 
 
-## Output 
+## Background Administrative Units in Norway
 
-### Official Changes 
+-  Basic Statistical Units (BSU/Grunnkrets) 
+The Basic Statistical Units (BSU), also referred to as Grunnkrets, are the most granular administrative units in the Norwegian administration. \ As of January 2022, there are a total of 14'100 such units. These units are largely used for adminstrative purposes by municipality and national adminstrators and have a median population size of 250 inhabitants as of 2018. 
 
-A data frame containing all the official reported changes in the period specified by the user
-```R
-head(df_change, 5)
-        from              oldName       to              newName     year
-# 1: 02191601 Slependen - Tanum 18   02191618 Slependen - Tanum 18   1991
-# 2: 02191601 Slependen - Tanum 18   02191619 Slependen - Tanum 19   1991
-# 3: 02191601 Slependen - Tanum 18   02191620 Slependen - Tanum 20   1991
-# 4: 02192104       Bærums verk 17   02192117       Bærums verk 17   1991
-# 5: 02192104       Bærums verk 17   02192118       Bærums verk 18   1991
-````
-The year column indicates the year in which the change took effect. 
+- Municipalities (Kommune)
+The municipalities are on the higher level administrative unit with its own administration. Municipalities provide some of the public infrastrucutre independently and serve as a political unit. \ As of January 2022, there are a total of 356 municipalities in Norway. The median population size of a municipality lies at 4'669 inhabitants as of 2018. 
 
-### Status Quo 
-
-A data frame containing a full panel of the official location codes in a given year
-
-```R
-head(df_status, 5)
-# A tibble: 10 × 4
-       geoID name                 from    to
-       <int> <chr>               <int> <int>
-# 1 1010101 Karrestad            1990  1991
-# 2 1010102 Båstadlund           1990  1991
-# 3 1010103 Låby                 1990  1991
-# 4 1010104 Stangeløkka          1990  1991
-# 5 1010105 Refne - Banken       1990  1991
-```
-The from and to columns indicate the period for which these codes were officially in effect.
-
-### The Key
-
-This is the main object of interest to the user. The key will act as a data frame that can be merged to a population registry (by year and location ID) assigning each observation a Cluster-ID which is ensured to be tractable 
-over the time period specified when generating the data set. 
-
-```R
-head(df_key, 5) 
-# A tibble: 10 × 4
-       geoID name                cluster_id  year
-       <int> <chr>                    <int> <int>
- # 1 1010101 Karrestad               100716  1990
- # 2 1010102 Båstadlund              100714  1990
- # 3 1010103 Låby                    100715  1990
- # 4 1010104 Stangeløkka             100715  1990
- # 5 1010105 Refne - Banken          100715  1990
-```
-
-
+- County (Fylke) 
+The counties are the highest order administrative unit in Norway. They serve as a political unit and priovde certain public administrative and serice tasks. Norway is comprised of a total of 15 counties. 
