@@ -1,5 +1,5 @@
 df_key_join <- NGeoTrack::df_key_join
-expl <- check_overlap(df_key = df_key_joine)
+expl <- check_overlap(df_key = df_key_join)
 
 expl$candidates
 # [1] 100124 100125 100016 100373

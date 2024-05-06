@@ -2,5 +2,7 @@
 
 export(EtE_changes)
 export(check_overlap)
+export(coerce_shape)
 export(gather_change)
+export(nrow_find)
 export(status_quo)
