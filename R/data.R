@@ -1,61 +1,18 @@
-#' Shape File Municipalities of Norway (2021)
+#' Example Joint Key 1999-2018
 #'
-#' A data series by the Norwegian mapping authority, released on 'GEONORGE'.
+#' A data set created the functions provided in this package.
 #'
-#' @format ## `shp_mun_2021`
-#' A data frame with 363 rows and 3 columns:
+#' @format ## `df_key_join`
+#' A data frame with 265'326 rows and 7 columns:
 #' \describe{
-#'   \item{kommune}{Municipality Identifier (Not Harmonized)}
-#'   \item{year}{Year}
-#'   \item{geometry}{A sfc_Polygon, spacial definition of municipalities}
+#'   \item{geoID}{Numeric: BSU Identifier (Not Harmonized)}
+#'   \item{Gcluster_id}{Numeric: Harmonized BSU identifier}
+#'   \item{Gname}{Char: Name of BSU-cluster}
+#'   \item{mun_id}{Numeric: Municipality identifier (Not Harmonized)}
+#'   \item{Ccluster_id}{Numeric: Harmonized Municipality identifier}
+#'   \item{Cname}{Char: Name of Municipality-cluster}
 #'   ...
 #' }
-#' @source <https://kartkatalog.geonorge.no/>
-"shp_mun_2021"
+#' @source <https://laurincurschellas.github.io/NGeoTrack/reference/EtE_changes.html>
+"df_key_join"
 
-
-#' Shape File Municipalities of Norway (2018)
-#'
-#' A data series by the Norwegian mapping authority, released on 'GEONORGE'.
-#'
-#' @format ## `shp_mun_2018`
-#' A data frame with 363 rows and 3 columns:
-#' \describe{
-#'   \item{kommune}{Municipality Identifier (Not Harmonized)}
-#'   \item{year}{Year}
-#'   \item{geometry}{A sfc_Polygon, spacial definition of municipalities}
-#'   ...
-#' }
-#' @source <https://kartkatalog.geonorge.no/>
-"shp_mun_2018"
-
-
-#' Shape File Basic Statistical Units (BSU) of Norway (2018)
-#'
-#' A data series by the Norwegian mapping authority, released on 'GEONORGE'.
-#'
-#' @format ## `shp_bsu_2018`
-#' A data frame with 14'058 rows and 3 columns:
-#' \describe{
-#'   \item{grunnkrets}{BSU Identifier (Not Harmonized)}
-#'   \item{year}{Year}
-#'   \item{geometry}{A sfc_Polygon, spacial definition of BSU's}
-#'   ...
-#' }
-#' @source <https://kartkatalog.geonorge.no/>
-"shp_bsu_2018"
-
-#' Shape File Basic Statistical Units (BSU) of Norway (2021)
-#'
-#' A data series by the Norwegian mapping authority, released on 'GEONORGE'.
-#'
-#' @format ## `shp_bsu_2021`
-#' A data frame with 14'102 rows and 3 columns:
-#' \describe{
-#'   \item{grunnkrets}{BSU Identifier (Not Harmonized)}
-#'   \item{year}{Year}
-#'   \item{geometry}{A sfc_Polygon, spacial definition of BSU's}
-#'   ...
-#' }
-#' @source <https://kartkatalog.geonorge.no/>
-"shp_bsu_2021"

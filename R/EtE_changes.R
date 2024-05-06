@@ -1,5 +1,5 @@
 
-#' @export
+
 nrow_find <- function(df_list, max = TRUE) {
 
   index <- ifelse(
@@ -11,7 +11,7 @@ nrow_find <- function(df_list, max = TRUE) {
 
 }
 
-#' @export
+
 coerce_shape <- function(df, change = TRUE) {
 
   if (change) {
@@ -113,9 +113,9 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
   # Individual Case -----------------------------------------------
   if (!jointly) {
     # Coerce into form:
-    df_change <- coerce_shape(df_change, change = TRUE)
+    df_change <- NGeoTrack:::coerce_shape(df_change, change = TRUE)
     # Filter based on paramter 'to' and NOT the variable 'to'
-    df_status <- coerce_shape(df_status, change = FALSE) |>
+    df_status <- NGeoTrack:::coerce_shape(df_status, change = FALSE) |>
       dplyr::filter(from <= ({{to}}-1))
 
     # Handle Case of no changes - in such a period the key is equal to the status
@@ -173,11 +173,11 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
   if (jointly) {
 
     # Extract from supplied list (municipal data is always smaller than the grunnkrets) and coerse into shape
-    df_change_bsu <- coerce_shape(nrow_find(df_change , max = TRUE), change = TRUE)
-    df_change_mun <- coerce_shape(nrow_find(df_change , max = FALSE), change = TRUE)
-    df_status_bsu <- coerce_shape(nrow_find(df_status , max = TRUE), change = FALSE) |>
+    df_change_bsu <- NGeoTrack:::coerce_shape(NGeoTrack:::nrow_find(df_change , max = TRUE), change = TRUE)
+    df_change_mun <- NGeoTrack:::coerce_shape(NGeoTrack:::nrow_find(df_change , max = FALSE), change = TRUE)
+    df_status_bsu <- NGeoTrack:::coerce_shape(NGeoTrack:::nrow_find(df_status , max = TRUE), change = FALSE) |>
       dplyr::filter(from <= ({{to}}-1))
-    df_status_mun <- coerce_shape(nrow_find(df_status , max = FALSE), change = FALSE) |>
+    df_status_mun <- NGeoTrack:::coerce_shape(NGeoTrack:::nrow_find(df_status , max = FALSE), change = FALSE) |>
       dplyr::filter(from <= ({{to}}-1))
 
 

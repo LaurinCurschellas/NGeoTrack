@@ -30,7 +30,7 @@ of top-level administrative units.
 There identification and adjustment is crucial if the user is interested in top-level fixed effects.
 Otherwise a BSU cluster could be assigned to 2 municipalities simoultaniously.
 
-The function takes any jointly estimated key from \code{EtE_changes()} and returns a list object.
+The function takes any jointly estimated key from \code{\link[=EtE_changes]{EtE_changes()}} and returns a list object.
 }
 \examples{
 expl <- check_overlap(df_key = key_joint)

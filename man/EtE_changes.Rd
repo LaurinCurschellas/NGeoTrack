@@ -2,7 +2,7 @@
 % Please edit documentation in R/EtE_changes.R
 \name{EtE_changes}
 \alias{EtE_changes}
-\title{Creates Key to Harmonized Adm. Units}
+\title{Creates Key of Harmonized Adm. Units}
 \usage{
 EtE_changes(df_status = x, df_change = y , from = startYear, to = endYear, jointly = FALSE)
 }
@@ -34,7 +34,7 @@ For joint harmonization the lower level adm. unit is mapped to corresponding
 }
 }
 \description{
-Takes the data frames created by \code{?status_quo}  and \code{?gather_change}, returns a key that maps each identifier
+Takes the data frames created by \code{\link[=status_quo]{status_quo()}} and \code{\link[=gather_change]{gather_change()}}, returns a key that maps each identifier
 to their traceable cluster.
 
 Clusters are defined as the least common unit which can be uniquely distinguished at any given point in time
