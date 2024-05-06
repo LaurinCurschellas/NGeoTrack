@@ -7,7 +7,7 @@
 #' There identification and adjustment is crucial if the user is interested in top-level fixed effects.
 #' Otherwise a BSU cluster could be assigned to 2 municipalities simoultaniously.
 #'
-#' The function takes any jointly estimated key from `EtE_changes()` and returns a list object.
+#' The function takes any jointly estimated key from [NGeoTrack::EtE_changes()] and returns a list object.
 #'
 #'
 #' @usage check_overlap(df_key = key_jointly)

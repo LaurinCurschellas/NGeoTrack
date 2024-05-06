@@ -40,7 +40,7 @@ coerce_shape <- function(df, change = TRUE) {
 #' Creates Key of Harmonized Adm. Units
 #'
 #' @description
-#' Takes the data frames created by `?status_quo`  and `?gather_change`, returns a key that maps each identifier
+#' Takes the data frames created by [status_quo()] and [gather_change()], returns a key that maps each identifier
 #' to their traceable cluster.
 #'
 #' Clusters are defined as the least common unit which can be uniquely distinguished at any given point in time

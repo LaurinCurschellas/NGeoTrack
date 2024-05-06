@@ -3,7 +3,7 @@ library(roxygen2)
 
 devtools::install_github("https://github.com/LaurinCurschellas/NGeoTrack")
 library(NGeoTrack)
-#library(dplyr)
+
 
 change_bsu <- gather_change(type = "grunnkrets", from = 1999, to = 2018)
 status_bsu <- status_quo(type = "grunnkrets", from = 1999, to = 2018)
