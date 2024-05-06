@@ -67,7 +67,7 @@ coerce_shape <- function(df, change = TRUE) {
 #'
 #' @example man/exmpl_EtE.R
 #'
-#' @returns A 'data.frame' object, with five columns `from`, `oldName`, `to`, `newName`, `year`
+#' @returns A `data.frame` object with 4 or 7 (joint harmonization) columns. Allows for a 1:1 mapping of all active identifiers in a year to their cluster.
 #' \itemize{
 #'   \item `geoID` - original numeric identifier
 #'   \item `name` - name of adm. unit

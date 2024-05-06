@@ -33,7 +33,6 @@ Otherwise a BSU cluster could be assigned to 2 municipalities simoultaniously.
 The function takes any jointly estimated key from \code{\link[=EtE_changes]{EtE_changes()}} and returns a list object.
 }
 \examples{
-#source("man/exmpl_EtE.R")
 df_key_join <- NGeoTrack::df_key_join
 expl <- check_overlap(df_key = df_key_join)
 
