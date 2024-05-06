@@ -3,3 +3,7 @@
 ^R_Validation$
 ^data$
 ^LICENSE\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
