@@ -1,7 +1,6 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^R_Validation$
-^data$
 ^LICENSE\.md$
 ^_pkgdown\.yml$
 ^docs$
