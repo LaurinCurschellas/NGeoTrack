@@ -1,4 +1,13 @@
 #> To cite package 'NGeoTrack' in publications use:
 #>
-#>   Curschellas L, (2024). "NGeoTrack - Harmonizing Norwegian Administrative Unit Identifiers"
+#>   Curschellas L, (2024). "NGeoTrack - Harmonizing Norwegian Administrative Identifiers"
 #>   <https://github.com/LaurinCurschellas/NGeoTrack>.
+#>
+#>
+#>   @Manual{,
+#>     title = {NGeoTrack: Harmonizing Norwegian Administrative Identifiers},
+#>     author = {Laurin L. Curschellas},
+#>     year = {2024},
+#>     note = {R package version 0.1.0},
+#>     url = {https://laurincurschellas.github.io/NGeoTrack/},
+#>   }

@@ -1,6 +1,6 @@
 # NGeoTrack 
 
-### Harmonize Norwegian Administrative-Unit Identifiers
+### Harmonizing Norwegian Administrative Identifiers
 
 Identifiers of administrative units (municipalities or BSU) are subject to change. Most changes occur because of top-level mergers or splits. 
 Inconsistent identifiers can inhibit the use of simple fixed effects or make it impossible to distinctly identify movers. 
