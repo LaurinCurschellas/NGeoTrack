@@ -23,8 +23,6 @@ devtools::install_github("https://github.com/LaurinCurschellas/NGeoTrack")
 
 **Dependencies**: [`dplyr`](https://dplyr.tidyverse.org/ "@dplyr"), [`httr2`](https://httr2.r-lib.org/ "@httr2"), and [`igraph`](https://igraph.org/ "@igraph") 
 
-*An application of tractable clusters is described in the [Appendix](Appendix/Appendix.md)*
-
 
 ## Description 
 #### [`gather_change()`](https://laurincurschellas.github.io/NGeoTrack/reference/gather_change.html "@GatherChange")  
