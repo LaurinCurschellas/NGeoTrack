@@ -172,10 +172,7 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
 
 
   if (nrow(data_frame) != 0) {
-    data_frame <- data_frame |>
-      dplyr::mutate(
-        year = as.Date(year, format = "%Y")
-      )
+    data_frame[, year := format(as.Date(year), "%Y")]
   }
 
   delCol <- c("oldShortName", "newShortName")
