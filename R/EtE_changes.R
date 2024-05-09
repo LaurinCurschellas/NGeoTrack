@@ -1,44 +1,3 @@
-
-#' @export
-#' @noRd
-nrow_find <- function(df_list, max = TRUE) {
-
-  index <- ifelse(
-    max == TRUE, which.max(sapply(df_list, nrow)) ,
-    which.min(sapply(df_list, nrow))
-  )
-
-  return(df_list[[index]])
-
-}
-
-#' @export
-#' @noRd
-coerce_shape <- function(df, change = TRUE) {
-
-  if (change) {
-
-    df <- df |>
-      dplyr::select(from, to, oldName , newName , year) |>
-      dplyr::mutate(
-        from = as.integer(from),
-        to = as.integer(to),
-        year = as.integer(year)
-      )
-
-  } else {
-
-    df <- df |>
-      dplyr::mutate(
-        geoID = as.integer(geoID)
-      )
-  }
-
-  return(df)
-}
-
-
-
 #' Creates Key of Harmonized Adm. Units
 #'
 #' @description
@@ -113,12 +72,26 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
 
   # Individual Case -----------------------------------------------
-  if (!jointly) {
-    # Coerce into form:
-    df_change <- NGeoTrack::coerce_shape(df_change, change = TRUE)
-    # Filter based on paramter 'to' and NOT the variable 'to'
-    df_status <- NGeoTrack::coerce_shape(df_status, change = FALSE) |>
-      dplyr::filter(from <= ({{to}}-1))
+  if (!jointly) { 
+
+    # Reveal the supplied type
+    #
+    # If type unrecognised, error message with fix suggestion, if different type error message
+    # Else parameter 'type' defined.
+    type_chg <- attributes(df_change)$comment
+    type_stat <- attributes(df_status)$comment
+
+    if (is.null(type_stat) | is.null(type_chg) ){
+      stop(simpleError(paste("\nThe type cannot be recognised, check the data frame attributes:",
+                           "\n\nExample: \t'attributes(df_change)$comment'",
+                        "\n\nSupply the correct type with 'attr(df_change, \"comment\") <- \"kommune\"")))
+    } else if (type_stat == type_chg) {
+      type <- type_stat
+      rm(type_chg, type_stat)
+    } else {stop(simpleError("\nThe supplied data is not of the same type ('grunnkrets','kommune' or 'fylket')")) }
+
+    # Restrict time period of the status to match the function definition
+    df_status <- df_status[df_status$from <= ({{to}} - 1), ]
 
     # Handle Case of no changes - in such a period the key is equal to the status
     if (nrow(df_change) != 0) {
@@ -134,16 +107,12 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
       df_members <- data.frame(
         name = as.integer(igraph::V(graph)$name),
-        cluster = clusters$membership,
+        cluster_id = as.integer(1*10^5+clusters$membership),
         row.names = NULL
-      ) |>
-        dplyr::mutate(
-          cluster_id = as.integer(1*10^5+cluster)
-        ) |>
-        dplyr::select(-cluster) |>
-        dplyr::distinct()
+      ) 
 
-
+      dupl <- duplicated(df_members[, c("name", "cluster_id")])
+      df_members <- df_members[!dupl, ]
 
       EtE_key <- dplyr::left_join(df_status , df_members, dplyr::join_by("geoID" == "name"))
       EtE_key <- EtE_key |>
@@ -156,16 +125,25 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
     } else {
 
       # This else statement refers to an empty df_change dataframe, in periods with no change
-      EtE_key <- df_status |>
-        dplyr::mutate(
-          geoID = geoID,
-          name = name,
-          cluster_id = geoID,
-          year = from
-        )|>
-        dplyr::select(-c(from,to))
+      EtE_key <- data.frame(
+        geoID = df_status$geoID,
+        name  = df_status$name,
+        cluster_id = df_status$geoID,
+        year = df_status$from
+      )
 
-    }
+    } 
+
+    # Type specific Column name for the cluster
+      colType <- switch (type,
+        grunnkrets = "Gcluster_id",
+        kommune    = "Ccluster_id",
+        fylket     = "Fcluster_id"
+      )
+
+      names(EtE_key) <- c("geoID", "name", colType, "year") 
+    # Indicate the harmonization level in attr(df_key, "comment") 
+      comment(EtE_key) <- paste("Harmonized '", type ,"'", sep = "")
 
     EtE_key <- EtE_key |>
       dplyr::arrange(year)
