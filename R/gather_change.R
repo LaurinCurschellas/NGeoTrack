@@ -1,8 +1,3 @@
-
-
-# This function is fully modelled after the package norgeo
-#helseprofil.github.io/norgeo/
-# If use cite original authors
 #' Create Panel of Changes to Administrative Identifiers
 #'
 #' @description
@@ -68,8 +63,6 @@ nYear <- length(vYear)
 Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/changes.json", sep = "")
 
 
-
-
   # Needed to get the colname format we want
   # Define a function to map old column names to new column names
   map_col_names <- function(old_name) {
@@ -124,7 +117,6 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
     listDT[[i]] <- chgDT
   }
 
-  cat("\n")
   data_frame <- data.table::rbindlist(listDT, fill = TRUE, use.names = TRUE)
 
   ## need to create empty data.table when it's empty data from API
@@ -145,36 +137,29 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
 
 
   if (nrow(data_frame) != 0) {
-    data_frame <- data_frame |>
-      dplyr::mutate(
-        year = as.Date(year, format = "%Y")
-      )
+    data_frame[, year := format(as.Date(year), "%Y")]
   }
 
-  delCol <- c("oldShortName", "newShortName")
-  data_frame <- data_frame |>
-    dplyr::select(-delCol)
+  keepCol <- base::setdiff(names(data_frame) , c("oldShortName", "newShortName"))
+  data_frame <- data_frame[, ..keepCol]
 
+  data_frame[, c("from", "to", "year")] <- base::lapply(data_frame[, c("from", "to", "year")], as.integer)
 
-  data_frame <- data_frame |>
-    dplyr::mutate(
-      year = as.integer(year)
-    )
-
-
+  ## Assign a comment attribute to the data.frame object based on the type
+  ## Will make process in EtE_changes() , easier.
+  data_frame <- as.data.frame(data_frame, row.names = NULL)
+  names(data_frame) <- c("from", "oldName", "to" , "newName", "year")
+  attr(data_frame, "comment") <- {{type}}
 
   ## ------------------------- Prepare information for print -------------
 
   label <- switch(type,
                   kommune = "Municipality",
-                  grunnkrets = "Grunnkrets (BSU)"
+                  grunnkrets = "Grunnkrets (BSU)",
+                  fylket = "County (\"Fylket\")"
   )
 
   Chg_Type <- data_frame |>
-    dplyr::mutate(
-      from = as.integer(from),
-      to = as.integer(to)
-    ) |>
     dplyr::group_by(from, year) |>
     dplyr::mutate(
       n_from = n(),
