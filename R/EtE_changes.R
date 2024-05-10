@@ -153,7 +153,50 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
   }
 
-  if (jointly) {
+  if (jointly) { 
+
+    # --------- Define Helper Function to extract the Correct bot- and top-level type
+
+    identify_hierarchy <- function(list_in) {
+
+      # Check the validity of the supplied datasets
+      type_pos1 <- attr(list_in[[1]], "comment")
+      type_pos2 <- attr(list_in[[2]], "comment")
+
+      if (is.null(type_pos1) | is.null(type_pos1) ) {
+        stop(simpleError(paste("\nThe type cannot be recognised, check the data frame attributes inside the list:",
+                               "\n\nExample: \t'attributes(df_change)$comment'",
+                               "\n\nSupply the correct type with 'attr(df_change, \"comment\") <- \"kommune\"")))
+      } else if (type_pos1 == type_pos2) {
+        stop(simpleError(paste("\nThe list supplied does not contain unique types")))
+      }
+
+
+      # Extract the type from list -one of them will be empty
+      grunnkrets_type <- Filter(function(x) attr(x, "comment") == "grunnkrets", list_in)
+      kommune_type <- Filter(function(x) attr(x, "comment") == "kommune", list_in)
+      fylket_type <- Filter(function(x) attr(x, "comment") == "fylket", list_in)
+
+      # Order the list according to hierarchy
+      ordered_list <- list(grunnkrets_type, kommune_type, fylket_type)
+      # Indicies of the non-empty list
+      indices <- which(sapply(ordered_list, length) > 0)
+
+      # Assign first non-empty to bot_level , second non-empty to top_level
+      bot_level <- ordered_list[[indices[1]]]
+      top_level <- ordered_list[[indices[2]]]
+
+      bot_level <- bot_level[[1]]
+      top_level <- top_level[[1]]
+
+      list_out <- list()
+
+      list_out[["bot_level"]] <- bot_level
+      list_out[["top_level"]] <- top_level
+
+      return(list_out)
+
+    }
 
     # Extract from supplied list (municipal data is always smaller than the grunnkrets) and coerse into shape
     df_change_bsu <- NGeoTrack::coerce_shape(NGeoTrack::nrow_find(df_change , max = TRUE), change = TRUE)
