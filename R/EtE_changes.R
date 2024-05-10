@@ -92,7 +92,10 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
     # Restrict time period of the status to match the function definition
     df_status <- df_status[df_status$from <= ({{to}} - 1), ]
+    # Re-order the df_change, such that the network is identified on from and to
+    df_change <- df_change[, c("from", "to", "oldName", "newName", "year")]
 
+    
     # Handle Case of no changes - in such a period the key is equal to the status
     if (nrow(df_change) != 0) {
 
