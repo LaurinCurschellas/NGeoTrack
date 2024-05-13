@@ -198,115 +198,181 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
     }
 
-    # Extract from supplied list (municipal data is always smaller than the grunnkrets) and coerse into shape
-    df_change_bsu <- NGeoTrack::coerce_shape(NGeoTrack::nrow_find(df_change , max = TRUE), change = TRUE)
-    df_change_mun <- NGeoTrack::coerce_shape(NGeoTrack::nrow_find(df_change , max = FALSE), change = TRUE)
-    df_status_bsu <- NGeoTrack::coerce_shape(NGeoTrack::nrow_find(df_status , max = TRUE), change = FALSE) |>
-      dplyr::filter(from <= ({{to}}-1))
-    df_status_mun <- NGeoTrack::coerce_shape(NGeoTrack::nrow_find(df_status , max = FALSE), change = FALSE) |>
-      dplyr::filter(from <= ({{to}}-1))
+    # Order the incoming list and extract the type from the attributes table of the data frame
+    ordered_chg <- identify_hierarchy(df_change)
+    ordered_stat <- identify_hierarchy(df_status)
 
+    df_chg_bot <- ordered_chg[["bot_level"]]
+    df_chg_top <- ordered_chg[["top_level"]]
 
+    df_stat_bot <- ordered_stat[["bot_level"]]
+    df_stat_top <- ordered_stat[["top_level"]]
+
+    # Reveal type:
+    if( attr(df_chg_bot, "comment") == attr(df_stat_bot, "comment") ) {
+      bot_type <- attr(df_chg_bot, "comment")
+    } else {stop(simpleError("Mismatch of type supplied in status list and change list!"))}
+
+    if( attr(df_chg_top, "comment") == attr(df_stat_top, "comment") ) {
+      top_type <- attr(df_chg_top, "comment")
+    } else {stop(simpleError("Mismatch of type supplied in status list and change list!"))}
+
+    # Type-specific column name for cluster_id and name columns 
+    clstr_col_bot <- switch (bot_type,
+                           grunnkrets = "Gcluster_id",
+                           kommune    = "Ccluster_id"
+    )
+    name_col_bot <- switch (bot_type,
+                             grunnkrets = "Gname",
+                             kommune    = "Cname"
+    )
+    clstr_col_top <- switch (top_type,
+                       kommune    = "Ccluster_id",
+                       fylket     = "Fcluster_id"
+    )
+    name_col_top <- switch (top_type,
+                             kommune    = "Cname",
+                             fylket     = "Fname"
+    )
+
+    # Restrict time period of the status to match the function definition
+    df_stat_bot <- df_stat_bot[df_stat_bot$from <= ({{to}} - 1), ]
+    df_stat_top <- df_stat_top[df_stat_top$from <= ({{to}} - 1), ]
+    # Order the change data
+    df_chg_bot <- df_chg_bot[, c("from", "to", "oldName", "newName", "year")]
+    df_chg_top <- df_chg_top[, c("from", "to", "oldName", "newName", "year")]
+                            
     # Handle period of no change in either BSU or municipality codes
     # Have to be handled seperately
     if (nrow(df_change_bsu) == 0) {
 
-      EtE_key_bsu <- df_status_bsu |>
-        dplyr::mutate(
-          geoID = geoID,
-          # Name and code have to be labelled for grunnkrets and municipalities
-          Gname = name,
-          Gcluster_id = geoID,
-          year = from
-        )|>
-        dplyr::select(-c(from,to))
+      EtE_key_bot <- data.frame(
+        geoID = df_stat_bot$geoID,
+        name  = df_stat_bot$name,
+        cluster_id = df_stat_bot$geoID,
+        year = df_stat_bot$from
+      )
 
     } else {
 
       # Use the undirected networks to identify the clusters of mergers/splits
-      graph_bsu <- igraph::graph_from_data_frame(df_change_bsu, directed = FALSE , vertices = NULL)
-      clusters_bsu <- igraph::components(graph_bsu, mode = c("strong"))
+      graph_bot <- igraph::graph_from_data_frame(df_chg_bot, directed = FALSE , vertices = NULL)
+      clusters_bot <- igraph::components(graph_bot, mode = c("strong"))
 
-      df_members_bsu <- data.frame(
-        Gname = as.integer(igraph::V(graph_bsu)$name),
-        cluster = clusters_bsu$membership,
+      df_members_bot <- data.frame(
+        name = as.integer(igraph::V(graph_bot)$name),
+        cluster_id = as.integer(1*10^5+clusters_bot$membership),
         row.names = NULL
-      ) |>
-        dplyr::mutate(
-          Gcluster_id = as.integer(1*10^5+cluster)
-        ) |>
-        dplyr::select(-cluster) |>
-        dplyr::distinct()
+      )
+      # Remove the duplicated rows
+      dupl <- duplicated(df_members_bot[, c("name", "cluster_id")])
+      df_members_bot <- df_members_bot[!dupl, ]
 
-      EtE_key_bsu <- dplyr::left_join(df_status_bsu , df_members_bsu, dplyr::join_by("geoID" == "Gname"))
-      EtE_key_bsu <- EtE_key_bsu |>
+      EtE_key_bot <- dplyr::left_join(df_stat_bot , df_members_bot, dplyr::join_by("geoID" == "name"))
+      EtE_key_bot <- EtE_key_bot |>
         dplyr::mutate(
-          Gcluster_id = ifelse(is.na(Gcluster_id) , geoID , Gcluster_id ),
-          Gname = name,
+          cluster_id = ifelse(is.na(cluster_id) , geoID , cluster_id ),
+          name = name,
           year = from
         ) |>
-        dplyr::select(-c(from,to,name))
+        dplyr::select(-c(from,to))
     }
 
     if (nrow(df_change_mun) == 0) {
 
-      EtE_key_mun <- df_status_mun |>
-        dplyr::mutate(
-          geoID = geoID,
-          Cname = name,
-          Ccluster_id = geoID,
-          year = from
-        )|>
-        dplyr::select(-c(from,to))
+       EtE_key_top <- data.frame(
+          geoID = df_stat_top$geoID,
+          name  = df_stat_top$name,
+          cluster_id = df_stat_top$geoID,
+          year = df_stat_top$from
+        )
 
     } else {
 
-      graph_mun <- igraph::graph_from_data_frame(df_change_mun, directed = FALSE , vertices = NULL)
-      clusters_mun <- igraph::components(graph_mun, mode = c("strong"))
-
+      graph_top <- igraph::graph_from_data_frame(df_change_top, directed = FALSE , vertices = NULL)
+      clusters_top <- igraph::components(graph_top, mode = c("strong"))
 
       # Extract all the clusters formed over the time period and the name of the nodes
       # Update this iterations' changes with the cluster id and unify format
       # Y: Cluster_id (allows for up to 99 thousand changes))
 
-      df_members_mun <- data.frame(
-        Cname = as.integer(igraph::V(graph_mun)$name),
-        cluster = clusters_mun$membership,
+      df_members_top <- data.frame(
+        name = as.integer(igraph::V(graph_top)$name),
+        cluster_id = as.integer(1*10^5+clusters_top$membership),
         row.names = NULL
-      ) |>
-        dplyr::mutate(
-          Ccluster_id = as.integer(5*10^5+cluster)
-        ) |>
-        dplyr::select(-cluster) |>
-        dplyr::distinct()
+      )
 
-      EtE_key_mun <- dplyr::left_join(df_status_mun , df_members_mun, dplyr::join_by("geoID" == "Cname"))
-      EtE_key_mun <- EtE_key_mun |>
+      dupl <- duplicated(df_members_top[, c("name", "cluster_id")])
+      df_members_top <- df_members_top[!dupl, ]
+
+      EtE_key_top <- dplyr::left_join(df_stat_top , df_members_top, dplyr::join_by("geoID" == "name"))
+      EtE_key_top <- EtE_key_top |>
         dplyr::mutate(
-          Ccluster_id = ifelse(is.na(Ccluster_id) , geoID , Ccluster_id ),
-          Cname = name,
+          cluster_id = ifelse(is.na(cluster_id) , geoID , cluster_id ),
+          name = name,
           year = from
         ) |>
-        dplyr::select(-c(from,to,name))
-
+        dplyr::select(-c(from,to))
     }
 
-    ## Merge the two keys into one joint key
+    names(EtE_key_bot) <- c("geoID", name_col_bot, clstr_col_bot, "year")
+    names(EtE_key_top) <- c("geoID", name_col_top, clstr_col_top, "year")
+    
+    ## Merge the two keys into one joint key on a case-by-case basis
+    # Case 1 - Bot: Grunnkrets  , Top: Fylket
+    # Case 2 - Bot: Grunnkrets  , Top: Kommune
+    # Case 3 - Bot: Kommune     , Top: Fylket
 
-    EtE_key_bsu <- EtE_key_bsu |>
-      dplyr::mutate(
-        str_l = as.integer(nchar(geoID)),
-        # Municipality id are either the first 3, or 4 digits depending on the length
-        # of the municipality code (and thus the length of the entire code)
-        mun_id = ifelse(str_l != 7 , as.integer(substr(geoID, 0, 4)),
-                        as.integer(substr(geoID, 0, 3)))
-      ) |>
-      dplyr::select(-c(str_l))
+    if (bot_type == "grunnkrets" & top_type == "fylket") {
+
+      EtE_key_bot <- EtE_key_bot |>
+        dplyr::mutate(
+          str_l = as.integer(nchar(geoID)),
+          # County id are either the first 1, or 2 digits depending on the length
+          # of the municipality code (and thus the length of the entire grunnkrets code)
+          flk_id = ifelse(str_l != 7 , as.integer(substr(geoID, 0, 2)),
+                          as.integer(substr(geoID, 0, 1)))
+        ) |>
+        dplyr::select(-c(str_l))
+
+      EtE_key <- dplyr::left_join(EtE_key_bot , EtE_key_top , dplyr::join_by("flk_id" == "geoID", "year" == "year"))
+
+      comment(EtE_key) <- "grunnkrets-fylket"
+
+    } else if (bot_type == "grunnkrets" & top_type == "kommune") {
+
+      EtE_key_bot <- EtE_key_bot |>
+        dplyr::mutate(
+          str_l = as.integer(nchar(geoID)),
+          # Municipality id are either the first 3, or 4 digits depending on the length
+          # of the municipality code (and thus the length of the entire grunnkrets code)
+          mun_id = ifelse(str_l != 7 , as.integer(substr(geoID, 0, 4)),
+                          as.integer(substr(geoID, 0, 3)))
+        ) |>
+        dplyr::select(-c(str_l))
 
 
-    EtE_key <- dplyr::left_join(EtE_key_bsu , EtE_key_mun , dplyr::join_by("mun_id" == "geoID", "year" == "year"))
+      EtE_key <- dplyr::left_join(EtE_key_bot , EtE_key_top , dplyr::join_by("mun_id" == "geoID", "year" == "year"))
 
+      comment(EtE_key) <- "grunnkrets-kommune"
 
+    } else if (bot_type == "kommune" & top_type == "fylket") {
+
+      EtE_key_bot <- EtE_key_bot |>
+        dplyr::mutate(
+          str_l = as.integer(nchar(geoID)),
+          # Municipality id are either the first 1, or 2 digits depending on the length
+          # of the municipality code
+          flk_id = ifelse(str_l != 3 , as.integer(substr(geoID, 0, 2)),
+                          as.integer(substr(geoID, 0, 1)))
+        ) |>
+        dplyr::select(-c(str_l))
+
+      EtE_key <- dplyr::left_join(EtE_key_bot , EtE_key_top , dplyr::join_by("flk_id" == "geoID", "year" == "year"))
+
+      comment(EtE_key) <- "kommune-fylket"
+
+    } else {stop(simpleError("Mismatch of type supplied in status list and change list!"))}
   }
 
   EtE_key <- EtE_key |>
