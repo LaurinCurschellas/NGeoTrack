@@ -4,7 +4,7 @@
 \alias{EtE_changes}
 \title{Creates Key of Harmonized Adm. Units}
 \usage{
-EtE_changes(df_status = x, df_change = y , from = startYear, to = endYear, jointly = FALSE)
+EtE_changes(df_status, df_change, from , to , jointly = FALSE)
 }
 \arguments{
 \item{df_status}{A data object: Panel of status (object of type: \code{data.frame} or \code{list})}

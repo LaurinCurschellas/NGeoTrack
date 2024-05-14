@@ -4,7 +4,7 @@
 \alias{check_overlap}
 \title{Identifies Overlapping Administrative Units}
 \usage{
-check_overlap(df_key = key_jointly)
+check_overlap(df_key)
 }
 \arguments{
 \item{df_key}{A data.frame: Only the joint data.frame from this package can be processed.}

@@ -289,7 +289,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
     } else {
 
-      graph_top <- igraph::graph_from_data_frame(df_change_top, directed = FALSE , vertices = NULL)
+      graph_top <- igraph::graph_from_data_frame(df_chg_top, directed = FALSE , vertices = NULL)
       clusters_top <- igraph::components(graph_top, mode = c("strong"))
 
       # Extract all the clusters formed over the time period and the name of the nodes

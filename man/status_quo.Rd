@@ -4,10 +4,10 @@
 \alias{status_quo}
 \title{Create Panel of Valid Administrative Identifiers}
 \usage{
-status_quo(type = "kommune", from = startYear , to = endYear)
+status_quo(type , from  , to )
 }
 \arguments{
-\item{type}{A string: \code{"kommune"} or \code{"grunnkrets"}}
+\item{type}{A string: \code{"kommune"}, \code{"grunnkrets"} or \code{"fylket"}}
 
 \item{from}{An integer: Start year of panel}
 

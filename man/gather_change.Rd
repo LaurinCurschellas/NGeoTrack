@@ -4,10 +4,10 @@
 \alias{gather_change}
 \title{Create Panel of Changes to Administrative Identifiers}
 \usage{
-gather_change(type = "kommune", from = startYear , to = endYear)
+gather_change(type , from , to )
 }
 \arguments{
-\item{type}{A string: \code{"kommune"} or \code{"grunnkrets"}}
+\item{type}{A string: \code{"kommune"}, \code{"grunnkrets"} or \code{"fylket"}}
 
 \item{from}{An integer: Start year of panel}
 

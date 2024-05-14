@@ -1,21 +1,28 @@
-Package: NGeoTrack
 Type: Package
+Package: NGeoTrack
 Title: Harmonizing Norwegian Administrative Identifiers
-Version: 0.1.0
-Authors@R: person("Laurin", "Curschellas", email = "laurin@curschellas.net",
-  role = c("aut", "cre"))
-URL: https://laurincurschellas.github.io/NGeoTrack/ , https://github.com/LaurinCurschellas/NGeoTrack 
+Version: 0.1.1
+Authors@R: 
+    person("Laurin", "Curschellas", , "laurin@curschellas.net", role = c("aut", "cre"))
 Maintainer: The package maintainer <laurin@curschellas.net>
-Description: Identifiers of administrative units (municipalities or BSU) are subject to change. Most changes occur because of top-level mergers or splits. When the identifiers change over time, it is impossible to cleanly estimate fixed effects or to distinguish between individuals moving vs. simply the identifier changing.     This package harmonizes administrative units into clusters which are uniquely tractable across the whole period, specified by the user. 
+Description: Identifiers of administrative units (municipalities or BSU)
+    are subject to change. Most changes occur because of top-level mergers
+    or splits. When the identifiers change over time, it is impossible to
+    cleanly estimate fixed effects or to distinguish between individuals
+    moving vs. simply the identifier changing.  This package harmonizes
+    administrative units into clusters which are uniquely tractable across
+    the whole period, specified by the user.
 License: MIT + file LICENSE
+URL: https://laurincurschellas.github.io/NGeoTrack/ ,
+    https://github.com/LaurinCurschellas/NGeoTrack
+Depends:
+    R (>= 2.10),
+    data.table(>= 1.15.4),
+    dplyr (>= 1.1.4)
+Imports: 
+    httr2 (>= 1.0.1),
+    igraph (>= 2.0.3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
-Depends:
-    dplyr (>= 1.1.4),
-    data.table(>= 1.15.4),
-    R (>= 2.10)
-Imports: 
-    httr2 (>= 1.0.1),
-    igraph (>= 2.0.3)

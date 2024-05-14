@@ -10,7 +10,7 @@
 #' The function takes any jointly estimated key from [NGeoTrack::EtE_changes()] and returns a list object.
 #'
 #'
-#' @usage check_overlap(df_key = key_jointly)
+#' @usage check_overlap(df_key)
 #'
 #' @param df_key A data.frame: Only the joint data.frame from this package can be processed.
 #'
@@ -30,15 +30,15 @@
 #'   }
 #' }
 #' @export
-check_overlap <- function(df_key ) { 
+check_overlap <- function(df_key ) {
 
-  # Recognise the supplied types: 
+  # Recognise the supplied types:
   constr <- attributes(df_key)$comment
   components <- strsplit(constr, "-")[[1]]
 
   bot_type <- components[1]
   top_type <- components[2]
-  
+
   # Unify the names of the columns across different types of keys
   # The names are added back in to the output at the end
   internal <- df_key
@@ -81,7 +81,7 @@ check_overlap <- function(df_key ) {
 
   test <- tidyr::pivot_wider(test, names_from = name, values_from = c(topID, topName))
 
-  # Redefine the Column names of the output, based on the supplied case: 
+  # Redefine the Column names of the output, based on the supplied case:
   botID <- switch(
     bot_type,
     grunnkrets = "Gcluster_id",
@@ -95,11 +95,11 @@ check_overlap <- function(df_key ) {
   )
 
   topID <- paste(top_prefix, "cluster_id", sep = "")
-  topName <- paste(top_prefix, "name", sep = "")  
+  topName <- paste(top_prefix, "name", sep = "")
   NewColnames <- c(botID, paste(topID, "_1", sep = ""), paste(topID, "_2", sep = ""),
                    paste(topName, "_1", sep = ""), paste(topName, "_2", sep = ""))
   colnames(test) <- NewColnames
-    
+
   # Print the wide-format data frame
   d <- Sys.setlocale(category = "LC_ALL", locale = "en_US.UTF-8") # System has to be able to read the UTF-8 characters
 
