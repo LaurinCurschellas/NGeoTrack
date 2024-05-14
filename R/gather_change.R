@@ -1,40 +1,3 @@
-
-
-# This function is fully modelled after the package norgeo
-#helseprofil.github.io/norgeo/
-# If use cite original authors
-
-# We want to extract all official changes to the grunnkrets from 2002 to present
-# (or any other specified year)
-
-# Brief description:
-# Function Variables:
-# type = :
-# The type variable let's you select whether you want to track municipalities or grunnkrets
-# (takes values "kommune" , "grunnkrets")
-#
-# from = :
-# Specifies the Starting year
-# Note there are no official reports before 2002 (can take values 2002-2023)
-#
-# to = :
-# Specifies the end year of the period you want to consider.
-# Note if left unspecified it will automatically assume that you want to track to the present year
-
-
-# Output:
-# Is data frame. Number of rows depends on the amount of changes in the years specified.
-# Always 6 columns:
-# "from" id before change
-# "oldName" Name of the grunnkrets before change
-#
-# "to" id as per the year specified in the year column
-# "newName" Name after the change
-# "year" is the year of the new change taking effect. i.e. starting 02.01.YEAR is
-#  when the changes take effect
-
-
-
 #' Create Panel of Changes to Administrative Identifiers
 #'
 #' @description
@@ -66,7 +29,8 @@ gather_change <- function(type , from , to ) {
 # The class is probably defined to the values that the API recognises for each level of administrative unit.
 klass <- switch(type,
                 kommune = 131,
-                grunnkrets = 1
+                grunnkrets = 1, 
+                fylket = 104
 )
 
 if (is.null(to)) {
@@ -74,15 +38,19 @@ if (is.null(to)) {
 }
 
 if (type == "grunnkrets" & from < 1980){
-  stop(simpleError("For grunnkrets data only traces back to 1980, consult SSB: \"https://www.ssb.no/klass/klassifikasjoner/1/versjoner\""))
+  stop(simpleError("The basic statistical unit code only trace back to 1980, consult SSB: \"https://www.ssb.no/klass/klassifikasjoner/1/versjoner\""))
 }
 
 if (type == "kommune" & from < 1950){
-  stop(simpleError("For grunnkrets data only traces back to 1950, consult SSB: \"https://www.ssb.no/klass/klassifikasjoner/131/versjoner\""))
+  stop(simpleError("The municipality codes only trace back to 1950, consult SSB: \"https://www.ssb.no/klass/klassifikasjoner/131/versjoner\""))
+}
+
+if (type == "fylket" & from < 1842){
+  stop(simpleError("The fylket codes only trace back to 1842, consult SSB: \"https://www.ssb.no/klass/klassifikasjoner/104/versjoner\""))
 }
 
 if (is.null(from)) {
-  stop(simpleError("Specify a start date from 2002-present"))
+  stop(simpleError("Specify a start date from 1842-present"))
 }
 
 vYear <- from:to
@@ -93,8 +61,6 @@ nYear <- length(vYear)
 # For municipality: "http://data.ssb.no/api/klass/v1/classifications/131/changes.json"
 # For grunnkrets:   "http://data.ssb.no/api/klass/v1/classifications/1/changes.json"
 Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/changes.json", sep = "")
-
-
 
 
   # Needed to get the colname format we want
@@ -151,7 +117,6 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
     listDT[[i]] <- chgDT
   }
 
-  cat("\n")
   data_frame <- data.table::rbindlist(listDT, fill = TRUE, use.names = TRUE)
 
   ## need to create empty data.table when it's empty data from API
@@ -175,30 +140,26 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
     data_frame[, year := format(as.Date(year), "%Y")]
   }
 
-  delCol <- c("oldShortName", "newShortName")
-  data_frame <- data_frame |>
-    dplyr::select(-delCol)
+  keepCol <- base::setdiff(names(data_frame) , c("oldShortName", "newShortName"))
+  data_frame <- data_frame[, ..keepCol]
 
+  data_frame[, c("from", "to", "year")] <- base::lapply(data_frame[, c("from", "to", "year")], as.integer)
 
-  data_frame <- data_frame |>
-    dplyr::mutate(
-      year = as.integer(year)
-    )
-
-
+  ## Assign a comment attribute to the data.frame object based on the type
+  ## Will make process in EtE_changes() , easier.
+  data_frame <- as.data.frame(data_frame, row.names = NULL)
+  names(data_frame) <- c("from", "oldName", "to" , "newName", "year")
+  attr(data_frame, "comment") <- {{type}}
 
   ## ------------------------- Prepare information for print -------------
 
   label <- switch(type,
                   kommune = "Municipality",
-                  grunnkrets = "Grunnkrets (BSU)"
+                  grunnkrets = "Grunnkrets (BSU)",
+                  fylket = "County (\"Fylket\")"
   )
 
   Chg_Type <- data_frame |>
-    dplyr::mutate(
-      from = as.integer(from),
-      to = as.integer(to)
-    ) |>
     dplyr::group_by(from, year) |>
     dplyr::mutate(
       n_from = n(),

@@ -38,7 +38,8 @@ status_quo <- function(type ,from , to) {
   # Set the parameters for the URL Query & check validity of time parameters
   klass <- switch(type,
                   kommune = 131,
-                  grunnkrets = 1
+                  grunnkrets = 1,
+                  fylket = 104
   )
 
   if (is.null(to)) {
@@ -46,20 +47,33 @@ status_quo <- function(type ,from , to) {
   }
 
   if (type == "grunnkrets" & from < 1980){
-    stop(simpleError("The basic statistical unit codes only traces back to 1980, consult SSB: \"https://www.ssb.no/klass/klassifikasjoner/1/versjoner\""))
+    stop(simpleError("The basic statistical unit code only trace back to 1980, consult SSB: \"https://www.ssb.no/klass/klassifikasjoner/1/versjoner\""))
   }
 
   if (type == "kommune" & from < 1950){
-    stop(simpleError("The municipality codes only traces back to 1950, consult SSB: \"https://www.ssb.no/klass/klassifikasjoner/131/versjoner\""))
+    stop(simpleError("The municipality codes only trace back to 1950, consult SSB: \"https://www.ssb.no/klass/klassifikasjoner/131/versjoner\""))
+  }
+
+  if (type == "fylket" & from < 1842){
+    stop(simpleError("The fylket codes only trace back to 1842, consult SSB: \"https://www.ssb.no/klass/klassifikasjoner/104/versjoner\""))
   }
 
   if (is.null(from)) {
-    stop(simpleError("Specify a start date from 1980-present"))
+    stop(simpleError("Specify a start date from 1842-present"))
   }
 
   Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/codes.json", sep = "")
 
-
+  # Needed to get the colname format we want
+  # Define a function to map old column names to new column names
+  map_col_names <- function(old_name) {
+    switch(old_name,
+           "codes.code" = "geoID",
+           "codes.name" = "name",
+           "codes.validFromInRequestedRange" = "from",
+           "codes.validToInRequestedRange" = "to",
+           old_name)
+  }
 
   outDAT <- data.frame( )
 
@@ -78,48 +92,39 @@ status_quo <- function(type ,from , to) {
       httr2::req_retry(max_tries = 5) |>
       httr2::req_perform()
 
-    chgDT <- koReg %>% httr2::resp_body_json(simplifyDataFrame = TRUE)
+    chgDT <- koReg |> httr2::resp_body_json(simplifyDataFrame = TRUE)
     chgDT <- data.table::as.data.table(chgDT)
 
 
 
-    # Coerce into the desired shape and encoding
+    # ------------------------- Coerce into the desired shape and encoding
+    # The grunnkrets data has to be seperated from its higher level data
     if (type == "grunnkrets") {
+      chgDT <- chgDT[chgDT$codes.level == 2 , ]
+    }
 
-    chgDT <- chgDT |>
-      dplyr::filter(codes.level == 2) |>
-      dplyr::mutate(
-        geoID = as.integer(codes.code),
-        name = as.character(codes.name),
-        from = as.integer(substr(codes.validFromInRequestedRange, 0 , 4)),
-        to = as.integer(substr(codes.validToInRequestedRange, 0 , 4))
-      ) %>%
-      dplyr::select(c(geoID , name , from , to))
+  # Rename the columns, to fit our requirements, see map_col_names()
+  colx <- names(chgDT)
+  cols <- base::sapply(colx, map_col_names)
+  data.table::setnames(chgDT, colx, cols)
 
+  # keep the columns c("geoID", "name", "from" , "to")
+  keepCols <- c("geoID", "name", "from" , "to")
+  chgDT <- chgDT[, ..keepCols]
 
-    outDAT <- rbind(outDAT,chgDT)
+  # Transform date strings to year string
+  chgDT[, c("from", "to")] <- base::lapply(chgDT[, c("from", "to")], function(x) substr(x, 0, 4))
+  chgDT[, c("geoID", "from", "to")] <- base::lapply(chgDT[, c("geoID", "from", "to")], as.integer)
 
-    } else if (type == "kommune") {
-
-      chgDT <- chgDT |>
-        dplyr::mutate(
-          geoID = as.integer(codes.code),
-          name = as.character(codes.name),
-          from = as.integer(substr(codes.validFromInRequestedRange, 0 , 4)),
-          to = as.integer(substr(codes.validToInRequestedRange, 0 , 4))
-        ) %>%
-        dplyr::select(c(geoID , name , from , to))
-
-      outDAT <- rbind(outDAT,chgDT)
-    } else {cat("No Valid Type: choose \"kommune\" or \"grunnkrets\"")}
+  outDAT <- rbind(outDAT,chgDT)
 
   }
 
 
   # Ensure that each ID can only be observed once per year
-  outDAT <- outDAT %>%
+  outDAT <- outDAT |>
     dplyr::filter(from != to) |>
-    dplyr::group_by(to) %>%
+    dplyr::group_by(to) |>
     dplyr::distinct(geoID, name , .keep_all = TRUE) |>
     dplyr::ungroup()
 
@@ -127,10 +132,20 @@ status_quo <- function(type ,from , to) {
   outDAT <- outDAT |>
     dplyr::mutate(
       # Identify the Unspecified ones and remove them as they are not part of an actual cluster
-      end_9 = ifelse(grepl("9999$", as.character(geoID)), 1, 0)
+        end_9 = ifelse(grepl("9999$", as.character(geoID)) & {{type}} %in% c("kommune", "grunnkrets"),
+                       1, ifelse(grepl("99$", as.character(geoID)) & {{type}} == "fylket" , 1, 0))
     ) %>%
     dplyr::filter(end_9 != 1) |>
-    dplyr::select(-end_9)
+    dplyr::select(-end_9) 
+
+                                           
+  ## Assign a comment attribute to the data.frame object based on the type
+  ## Will make process in EtE_changes() , easier.
+  outDAT <- as.data.frame(outDAT, row.names = NULL)
+  names(outDAT) <- c("geoID", "name", "from" , "to")
+  attr(outDAT, "comment") <- {{type}}
+
+  attributes(outDAT)
 
   return(outDAT)
 
