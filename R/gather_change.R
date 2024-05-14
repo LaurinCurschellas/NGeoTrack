@@ -6,9 +6,9 @@
 #'
 #' The function calls the API of Statistics Norway (SSB) and returns the pre-processed information.
 #'
-#' @usage gather_change(type = "kommune", from = startYear , to = endYear)
+#' @usage gather_change(type , from , to )
 #'
-#' @param type A string: `"kommune"` or `"grunnkrets"`
+#' @param type A string: `"kommune"`, `"grunnkrets"` or `"fylket"`
 #' @param from An integer: Start year of panel
 #' @param to   An integer: End year of panel
 #'
@@ -29,7 +29,7 @@ gather_change <- function(type , from , to ) {
 # The class is probably defined to the values that the API recognises for each level of administrative unit.
 klass <- switch(type,
                 kommune = 131,
-                grunnkrets = 1, 
+                grunnkrets = 1,
                 fylket = 104
 )
 

@@ -12,7 +12,7 @@
 #'
 #'
 #'
-#' @usage EtE_changes(df_status = x, df_change = y , from = startYear, to = endYear, jointly = FALSE)
+#' @usage EtE_changes(df_status, df_change, from , to , jointly = FALSE)
 #'
 #'
 #' @param df_status A data object: Panel of status (object of type: `data.frame` or `list`)

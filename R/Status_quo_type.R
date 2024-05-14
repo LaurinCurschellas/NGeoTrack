@@ -7,9 +7,9 @@
 #' The function calls the API of Statistics Norway (SSB) and returns the pre-processed information.
 #'
 #'
-#' @usage status_quo(type = "kommune", from = startYear , to = endYear)
+#' @usage status_quo(type , from  , to )
 #'
-#' @param type A string: `"kommune"` or `"grunnkrets"`
+#' @param type A string: `"kommune"`, `"grunnkrets"` or `"fylket"`
 #' @param from An integer: Start year of panel
 #' @param to   An integer: End year of panel
 #'
@@ -136,9 +136,9 @@ status_quo <- function(type ,from , to) {
                        1, ifelse(grepl("99$", as.character(geoID)) & {{type}} == "fylket" , 1, 0))
     ) %>%
     dplyr::filter(end_9 != 1) |>
-    dplyr::select(-end_9) 
+    dplyr::select(-end_9)
 
-                                           
+
   ## Assign a comment attribute to the data.frame object based on the type
   ## Will make process in EtE_changes() , easier.
   outDAT <- as.data.frame(outDAT, row.names = NULL)
