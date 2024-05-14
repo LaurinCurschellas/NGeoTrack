@@ -72,7 +72,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
 
   # Individual Case -----------------------------------------------
-  if (!jointly) { 
+  if (!jointly) {
 
     # Reveal the supplied type
     #
@@ -95,7 +95,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
     # Re-order the df_change, such that the network is identified on from and to
     df_change <- df_change[, c("from", "to", "oldName", "newName", "year")]
 
-    
+
     # Handle Case of no changes - in such a period the key is equal to the status
     if (nrow(df_change) != 0) {
 
@@ -112,7 +112,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
         name = as.integer(igraph::V(graph)$name),
         cluster_id = as.integer(1*10^5+clusters$membership),
         row.names = NULL
-      ) 
+      )
 
       dupl <- duplicated(df_members[, c("name", "cluster_id")])
       df_members <- df_members[!dupl, ]
@@ -135,7 +135,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
         year = df_status$from
       )
 
-    } 
+    }
 
     # Type specific Column name for the cluster
       colType <- switch (type,
@@ -144,8 +144,8 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
         fylket     = "Fcluster_id"
       )
 
-      names(EtE_key) <- c("geoID", "name", colType, "year") 
-    # Indicate the harmonization level in attr(df_key, "comment") 
+      names(EtE_key) <- c("geoID", "name", colType, "year")
+    # Indicate the harmonization level in attr(df_key, "comment")
       comment(EtE_key) <- paste("Harmonized '", type ,"'", sep = "")
 
     EtE_key <- EtE_key |>
@@ -153,7 +153,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
   }
 
-  if (jointly) { 
+  if (jointly) {
 
     # --------- Define Helper Function to extract the Correct bot- and top-level type
 
@@ -217,7 +217,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
       top_type <- attr(df_chg_top, "comment")
     } else {stop(simpleError("Mismatch of type supplied in status list and change list!"))}
 
-    # Type-specific column name for cluster_id and name columns 
+    # Type-specific column name for cluster_id and name columns
     clstr_col_bot <- switch (bot_type,
                            grunnkrets = "Gcluster_id",
                            kommune    = "Ccluster_id"
@@ -241,10 +241,10 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
     # Order the change data
     df_chg_bot <- df_chg_bot[, c("from", "to", "oldName", "newName", "year")]
     df_chg_top <- df_chg_top[, c("from", "to", "oldName", "newName", "year")]
-                            
+
     # Handle period of no change in either BSU or municipality codes
     # Have to be handled seperately
-    if (nrow(df_change_bsu) == 0) {
+    if (nrow(df_chg_bot) == 0) {
 
       EtE_key_bot <- data.frame(
         geoID = df_stat_bot$geoID,
@@ -278,7 +278,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
         dplyr::select(-c(from,to))
     }
 
-    if (nrow(df_change_mun) == 0) {
+    if (nrow(df_chg_top) == 0) {
 
        EtE_key_top <- data.frame(
           geoID = df_stat_top$geoID,
@@ -317,7 +317,7 @@ EtE_changes <- function(df_status ,df_change ,from , to, jointly = FALSE) {
 
     names(EtE_key_bot) <- c("geoID", name_col_bot, clstr_col_bot, "year")
     names(EtE_key_top) <- c("geoID", name_col_top, clstr_col_top, "year")
-    
+
     ## Merge the two keys into one joint key on a case-by-case basis
     # Case 1 - Bot: Grunnkrets  , Top: Fylket
     # Case 2 - Bot: Grunnkrets  , Top: Kommune

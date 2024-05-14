@@ -20,7 +20,7 @@ Important Note: If \code{jointly == TRUE} status and change information have to 
 The function is agnostic to the ordering of the elements in the list.}
 }
 \value{
-A 'data.frame' object, with five columns \code{from}, \code{oldName}, \code{to}, \code{newName}, \code{year}
+A \code{data.frame} object with 4 or 7 (joint harmonization) columns. Allows for a 1:1 mapping of all active identifiers in a year to their cluster.
 \itemize{
 \item \code{geoID} - original numeric identifier
 \item \code{name} - name of adm. unit
