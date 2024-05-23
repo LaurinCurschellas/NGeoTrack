@@ -44,7 +44,7 @@ check_overlap <- function(df_key ) {
   internal <- df_key
   colnames(internal) <- c("geoID", "botName", "botID", "year", "topgeoID", "topName", "topID")
 
-  test <- df_key %>%
+  test <- internal %>%
     dplyr::group_by(botID, year) %>%
     dplyr::mutate(
       n_Top = length(unique(topID))

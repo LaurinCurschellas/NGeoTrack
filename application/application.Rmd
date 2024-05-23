@@ -9,22 +9,49 @@ However, if we harmonize the administrative units across time we can directly co
 ### Data:
 
 -   **Administrative Units:** Statistic Norway ([SSB](https://www.ssb.no/klass/klassifikasjoner/1)) publishes the valid unit identifiers and changes to these identifiers. This will be handled by [NGeoTrack](https://laurincurschellas.github.io/NGeoTrack)
--   **Shape Files:** Official Shape Files of Norwegian Administrative Units are published by [Geonorge](https://www.geonorge.no/)
+-   **Shape Files:** Official Shape Files of Norwegian Administrative Units are published by [Geonorge](https://kartkatalog.geonorge.no/metadata/statistiske-enheter-grunnkretser-historiske-versjoner/02b6c97b-63da-4d46-9a70-6e9ef3442d54) 
 -   **Pollution Data:** We will use satellite-derived concentrations of PM$_{2.5}$ published by the Washington University in St. Luis (Annual and Monthly Mean PM$_{2.5}$ ($\mu g/m^3$) at $0.01^{\circ}$x$0.01^{\circ}$) [here](https://sites.wustl.edu/acag/datasets/surface-pm2-5/)
 
 ## Harmonize the Grunnkrets
-```{r}
+
+```{r, message = FALSE}
 library(devtools)
 library(dplyr)
 
 devtools::install_github("https://github.com/LaurinCurschellas/NGeoTrack")
 library(NGeoTrack) 
-
-# Download the Changes and Status of Grunnkrets (BSU) Identifiers in chosen Period
-chg_bsu <- gather_change(type = "grunnkrets", from = 1998, to = 2022)
-stat_bsu <- status_quo(type = "grunnkrets", from = 1998, to = 2022) 
-
-df_key <- EtE_changes(df_status = stat_bsu, df_change = chg_bsu, from = 1998, to = 2022) 
-
 ```
 
+The first step in harmonizing the location identifiers is to extract all the official changes from the SSB-API [``gather_change()``](https://laurincurschellas.github.io/NGeoTrack/reference/gather_change.html). 
+
+The function will return a data.frame as well as a message to the console which allows us to understand what type of changes have occurred to the identifiers. In this case we see that there were $132$ mergers of municipalities, and $15$ mergers of countiegs. 
+
+```{r}
+# Download the Changes and Status of Municipality ('kommune') Identifiers in chosen Period
+chg_mun <- gather_change(type = "kommune", from = 1998, to = 2022)
+stat_mun <- status_quo(type = "kommune", from = 1998, to = 2022) 
+
+# Download the Changes and Status of County ('fylket') Identifiers
+chg_cnt <- gather_change(type = "fylket", from = 1998, to = 2022)
+stat_cnt <- status_quo(type = "fylket", from = 1998, to = 2022)   
+
+#Note: 
+# The type of each data set can be retrieved as follows:
+attr(chg_mun, "comment") 
+
+# combine elements in list: 
+chg_list <- list(chg_mun, chg_cnt)
+stat_list <- list(stat_cnt, stat_mun)
+
+df_key <- EtE_changes(df_change = chg_list, df_status = stat_list, from = 1998 , to = 2022, jointly = TRUE)
+
+overlap <- check_overlap(df_key)
+
+
+
+
+``` 
+
+
+https://data.ssb.no/api/v0/en/table/13472/vs_komun
+API query for employed peoples: 
