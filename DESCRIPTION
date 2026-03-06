@@ -3,8 +3,9 @@ Package: NGeoTrack
 Title: Harmonizing Norwegian Administrative Identifiers
 Version: 0.1.1
 Authors@R: 
-    person("Laurin", "Curschellas", , "laurin@curschellas.net", role = c("aut", "cre"))
-Maintainer: The package maintainer <laurin@curschellas.net>
+    c(person(given = "Laurin L.", family = "Curschellas", email = "lcurschellas@ucdavis.edu", role = c("aut", "cre")))
+Author: Laurin L. Curschellas [aut, cre]
+Maintainer: Laurin L. Curschellas <lcurschellas@ucdavis.edu>
 Description: Identifiers of administrative units (municipalities or BSU)
     are subject to change. Most changes occur because of top-level mergers
     or splits. When the identifiers change over time, it is impossible to
@@ -16,13 +17,13 @@ License: MIT + file LICENSE
 URL: https://laurincurschellas.github.io/NGeoTrack/ ,
     https://github.com/LaurinCurschellas/NGeoTrack
 Depends:
-    R (>= 2.10),
-    data.table(>= 1.15.4),
-    dplyr (>= 1.1.4)
+    R (>= 4.1.0)
 Imports: 
+    data.table (>= 1.15.4),
+    dplyr (>= 1.1.4),
     httr2 (>= 1.0.1),
     igraph (>= 2.0.3)
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.3

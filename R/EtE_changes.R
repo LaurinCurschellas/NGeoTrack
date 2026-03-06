@@ -24,7 +24,7 @@
 #' The function is agnostic to the ordering of the elements in the list.
 #'
 #'
-#' @example man/exmpl_EtE.R
+#' @example inst/examples/exmpl_EtE.R
 #'
 #' @returns A `data.frame` object with 4 or 7 (joint harmonization) columns. Allows for a 1:1 mapping of all active identifiers in a year to their cluster.
 #' \itemize{

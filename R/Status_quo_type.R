@@ -110,7 +110,7 @@ status_quo <- function(type ,from , to) {
 
   # keep the columns c("geoID", "name", "from" , "to")
   keepCols <- c("geoID", "name", "from" , "to")
-  chgDT <- chgDT[, ..keepCols]
+  chgDT <- chgDT[, keepCols, with = FALSE]
 
   # Transform date strings to year string
   chgDT[, c("from", "to")] <- base::lapply(chgDT[, c("from", "to")], function(x) substr(x, 0, 4))
@@ -134,7 +134,7 @@ status_quo <- function(type ,from , to) {
       # Identify the Unspecified ones and remove them as they are not part of an actual cluster
         end_9 = ifelse(grepl("9999$", as.character(geoID)) & {{type}} %in% c("kommune", "grunnkrets"),
                        1, ifelse(grepl("99$", as.character(geoID)) & {{type}} == "fylket" , 1, 0))
-    ) %>%
+    ) |>
     dplyr::filter(end_9 != 1) |>
     dplyr::select(-end_9)
 

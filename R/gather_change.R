@@ -137,11 +137,11 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
 
 
   if (nrow(data_frame) != 0) {
-    data_frame[, year := format(as.Date(year), "%Y")]
+    data_frame$year <- format(as.Date(data_frame$year), "%Y")
   }
 
   keepCol <- base::setdiff(names(data_frame) , c("oldShortName", "newShortName"))
-  data_frame <- data_frame[, ..keepCol]
+  data_frame <- data_frame[, keepCol, with = FALSE]
 
   data_frame[, c("from", "to", "year")] <- base::lapply(data_frame[, c("from", "to", "year")], as.integer)
 
@@ -162,15 +162,15 @@ Url_qry <- paste("http://data.ssb.no/api/klass/v1/classifications/",klass,"/chan
   Chg_Type <- data_frame |>
     dplyr::group_by(from, year) |>
     dplyr::mutate(
-      n_from = n(),
-      dist_from_from = n_distinct(from),
-      dist_to_from   = n_distinct(to)
+      n_from = dplyr::n(),
+      dist_from_from = dplyr::n_distinct(from),
+      dist_to_from   = dplyr::n_distinct(to)
     )  |>
     dplyr::group_by(to , year) |>
     dplyr::mutate(
-      n_to = n(),
-      dist_from_to = n_distinct(from),
-      dist_to_to = n_distinct(to)
+      n_to = dplyr::n(),
+      dist_from_to = dplyr::n_distinct(from),
+      dist_to_to = dplyr::n_distinct(to)
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(

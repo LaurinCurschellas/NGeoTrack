@@ -1,0 +1,20 @@
+# Declare known NSE symbols used in data.table and dplyr expressions.
+utils::globalVariables(c(
+  ":=",
+  "..keepCol",
+  "..keepCols",
+  "cluster_id",
+  "dist_from_from",
+  "dist_from_to",
+  "dist_to_from",
+  "dist_to_to",
+  "end_9",
+  "geoID",
+  "max_year",
+  "n_Top",
+  "n_from",
+  "n_to",
+  "name",
+  "str_l",
+  "year"
+))

@@ -1,0 +1,234 @@
+---
+title: "NGeoTrack CRAN Check Remediation Notes"
+author: "Laurin L. Curschellas"
+date: "2026-03-05"
+output: html_document
+---
+
+## Scope
+
+This note documents the first CRAN-readiness remediation pass after running:
+
+- `R CMD build .`
+- `R CMD check --as-cran NGeoTrack_0.1.1.tar.gz`
+
+It captures each warning/note, its source, and the most direct fix.
+It also documents the risky replacement of `tidyr::pivot_wider()` in `check_overlap()` with base `stats::reshape()` and validates output shape with a minimal reproducible example.
+
+## Warning And Note Register
+
+### 1) Dependency warning (`check`)
+
+- Message:
+  - `'::' or ':::' import not declared from: 'tidyr'`
+  - `Packages in Depends field not imported from: 'data.table' 'dplyr'`
+- Source:
+  - `R/check_overlap.R` (`tidyr::pivot_wider()`)
+  - `DESCRIPTION` (`Depends` had `data.table` and `dplyr`)
+- Straightforward fix:
+  - Replace `tidyr::pivot_wider()` with base `stats::reshape()`.
+  - Move `data.table` and `dplyr` to `Imports`.
+  - Keep explicit `pkg::fun` calls.
+- Implementation status:
+  - Implemented in this pass.
+
+### 2) Build warning: serialized dataset version (`build`)
+
+- Message:
+  - serialized object implies `R >= 3.5.0`.
+- Source:
+  - `data/df_key_join.rda`
+- Straightforward fix:
+  - Keep modern R minimum (already needed by `|>`), or re-save with `version = 2` if older compatibility is required.
+- Implementation status:
+  - Deferred.
+
+### 3) Build warning: modern syntax (`build`)
+
+- Message:
+  - package uses `|>` and requires `R >= 4.1.0`.
+- Source:
+  - `R/EtE_changes.R`, `R/Status_quo_type.R`, `R/gather_change.R`
+- Straightforward fix:
+  - Set `Depends: R (>= 4.1.0)`.
+- Implementation status:
+  - Implemented in this pass.
+
+### 4) Note: New submission (`check`)
+
+- Message:
+  - `New submission`
+- Source:
+  - CRAN incoming checks.
+- Straightforward fix:
+  - No action needed.
+
+### 5) Note: local pandoc not installed (`check`)
+
+- Message:
+  - `README.md or NEWS.md cannot be checked without pandoc`
+- Source:
+  - Local environment.
+- Straightforward fix:
+  - Install pandoc locally (optional for CRAN submission itself).
+
+### 6) Note: codetools NSE/global bindings (`check`)
+
+- Message:
+  - no visible bindings/global function definitions for NSE symbols.
+- Source:
+  - NSE in dplyr/data.table expressions.
+- Straightforward fix:
+  - Use `|>` and fully qualify non-qualified dplyr calls.
+  - Reduce data.table NSE usage where easy.
+  - Add `utils::globalVariables()` for remaining known NSE symbols.
+- Implementation status:
+  - Implemented in this pass.
+
+### 7) Note: long Rd example lines (`check`)
+
+- Message:
+  - lines > 100 chars in `EtE_changes.Rd`.
+- Source:
+  - `man/EtE_changes.Rd`.
+- Straightforward fix:
+  - Wrap long example calls over multiple lines in roxygen source.
+- Implementation status:
+  - Deferred.
+
+### 8) Note: examples > 5 seconds (`check`)
+
+- Message:
+  - examples run long due API calls.
+- Source:
+  - `gather_change`, `status_quo`, `EtE_changes` examples.
+- Straightforward fix:
+  - Move heavy examples to `\donttest{}` and guard internet usage.
+- Implementation status:
+  - Deferred.
+
+### 9) Note: HTML tidy tool version (`check`)
+
+- Message:
+  - local `tidy` not recent enough.
+- Source:
+  - Local environment toolchain.
+- Straightforward fix:
+  - Update local HTML Tidy if needed.
+
+### 10) Build message: invalid filenames under `man/` (`build`)
+
+- Message:
+  - `man/exmpl_EtE.R`, `man/exmpl_ovrlp.R` invalid names for `man/`.
+- Source:
+  - Example scripts stored in `man/`.
+- Straightforward fix:
+  - Move those `.R` example files out of `man/` (for example to `inst/examples/`) and update `@example` tags.
+- Implementation status:
+  - Deferred.
+
+## Dependency Policy Applied
+
+Implemented changes in this pass:
+
+- Removed runtime need for `tidyr` by replacing `pivot_wider` with base `reshape`.
+- Moved `data.table` and `dplyr` from `Depends` to `Imports`.
+- Kept package-qualified calls (`dplyr::`, `data.table::`, `igraph::`, `httr2::`).
+- Set `R (>= 4.1.0)` to match actual syntax.
+
+## Risky Change Validation: `reshape` Replacing `pivot_wider`
+
+The goal is to preserve the same effective wide output used by `check_overlap()`:
+
+- one row per lower-level cluster (`botID`)
+- exactly two top-level columns each for ID and name
+- output columns in this order:
+  - `botID`, `topID_1`, `topID_2`, `topName_1`, `topName_2`
+
+```{r reshape-validation}
+# Minimal joint-key-like input with one overlapping lower-level cluster.
+# The overlap must happen within the same year for the same botID.
+df_key_min <- data.frame(
+  geoID = c(101001, 101002, 101003, 202001),
+  Gname = c("A1", "A2", "A3", "B1"),
+  Gcluster_id = c(5001, 5001, 5001, 5002),
+  year = c(2019, 2019, 2019, 2019),
+  mun_id = c(301, 302, 302, 401),
+  Cname = c("Mun X", "Mun Y", "Mun Y", "Mun Z"),
+  Ccluster_id = c(7001, 7002, 7002, 8001),
+  stringsAsFactors = FALSE
+)
+attr(df_key_min, "comment") <- "grunnkrets-kommune"
+
+# Internal shape used by check_overlap().
+internal <- df_key_min
+colnames(internal) <- c("geoID", "botName", "botID", "year", "topgeoID", "topName", "topID")
+
+test_long <- internal |>
+  dplyr::group_by(botID, year) |>
+  dplyr::mutate(n_Top = length(unique(topID))) |>
+  dplyr::ungroup() |>
+  dplyr::filter(n_Top != 1) |>
+  dplyr::select(c(botID, topID, topName, year)) |>
+  dplyr::distinct(botID, topID, topName, .keep_all = TRUE) |>
+  dplyr::group_by(botID, topID) |>
+  dplyr::mutate(max_year = max(year)) |>
+  dplyr::ungroup() |>
+  dplyr::filter(max_year == year) |>
+  dplyr::select(-c(year, max_year)) |>
+  dplyr::group_by(botID) |>
+  dplyr::mutate(name = seq_len(dplyr::n())) |>
+  dplyr::ungroup() |>
+  as.data.frame()
+
+# Base R replacement for tidyr::pivot_wider().
+wide_base <- test_long[order(test_long$botID, test_long$name), , drop = FALSE]
+wide_base <- stats::reshape(
+  wide_base,
+  idvar = "botID",
+  timevar = "name",
+  direction = "wide"
+)
+wide_base <- wide_base[, c("botID", "topID.1", "topID.2", "topName.1", "topName.2"), drop = FALSE]
+colnames(wide_base) <- c("botID", "topID_1", "topID_2", "topName_1", "topName_2")
+row.names(wide_base) <- NULL
+
+# Expected contract for this minimal case.
+expected <- data.frame(
+  botID = 5001,
+  topID_1 = 7001,
+  topID_2 = 7002,
+  topName_1 = "Mun X",
+  topName_2 = "Mun Y",
+  stringsAsFactors = FALSE
+)
+
+stopifnot(identical(wide_base, expected))
+wide_base
+```
+
+Optional confidence check against `tidyr::pivot_wider()` if installed locally:
+
+```{r optional-tidyr-compare, eval=TRUE}
+if (requireNamespace("tidyr", quietly = TRUE)) {
+  wide_tidyr <- tidyr::pivot_wider(test_long, names_from = name, values_from = c(topID, topName))
+  wide_tidyr <- wide_tidyr[, c("botID", "topID_1", "topID_2", "topName_1", "topName_2"), drop = FALSE]
+  wide_tidyr <- as.data.frame(wide_tidyr)
+
+  wide_base_cmp <- wide_base[order(wide_base$botID), , drop = FALSE]
+  wide_tidyr_cmp <- wide_tidyr[order(wide_tidyr$botID), , drop = FALSE]
+  row.names(wide_base_cmp) <- NULL
+  row.names(wide_tidyr_cmp) <- NULL
+
+  row.names(wide_tidyr) <- NULL
+  stopifnot(identical(wide_base_cmp, wide_tidyr_cmp))
+}
+```
+
+## Files Changed In This Pass
+
+- `R/check_overlap.R`
+- `R/Status_quo_type.R`
+- `R/gather_change.R`
+- `R/globals.R`
+- `DESCRIPTION`

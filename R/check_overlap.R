@@ -15,7 +15,7 @@
 #' @param df_key A data.frame: Only the joint data.frame from this package can be processed.
 #'
 #'
-#' @example man/exmpl_ovrlp.R
+#' @example inst/examples/exmpl_ovrlp.R
 #'
 #' @returns A 'list' object, with four 2 elements `candidates`, `details`
 #' \itemize{
@@ -44,11 +44,11 @@ check_overlap <- function(df_key ) {
   internal <- df_key
   colnames(internal) <- c("geoID", "botName", "botID", "year", "topgeoID", "topName", "topID")
 
-  test <- internal %>%
-    dplyr::group_by(botID, year) %>%
+  test <- internal |>
+    dplyr::group_by(botID, year) |>
     dplyr::mutate(
       n_Top = length(unique(topID))
-    ) %>%
+    ) |>
     dplyr::ungroup()
 
   candidates <- unique(test$botID[test$n_Top > 1])
@@ -66,20 +66,36 @@ check_overlap <- function(df_key ) {
 
   num_candidates <- length(candidates)
 
-  test <- test %>%
-    dplyr::filter(n_Top != 1) %>%
-    dplyr::select(c(botID, topID, topName, year)) %>%
-    dplyr::distinct(botID, topID , topName, .keep_all = TRUE) %>%
-    dplyr::group_by(botID, topID) %>% mutate(max_year = max(year)) %>% ungroup() %>%
-    dplyr::filter(max_year == year) %>%
-    dplyr::select(-c(year, max_year)) %>%
-    dplyr::group_by(botID) %>%
+  test <- test |>
+    dplyr::filter(n_Top != 1) |>
+    dplyr::select(c(botID, topID, topName, year)) |>
+    dplyr::distinct(botID, topID , topName, .keep_all = TRUE) |>
+    dplyr::group_by(botID, topID) |>
+    dplyr::mutate(max_year = max(year)) |>
+    dplyr::ungroup() |>
+    dplyr::filter(max_year == year) |>
+    dplyr::select(-c(year, max_year)) |>
+    dplyr::group_by(botID) |>
     dplyr::mutate(
-      name = c(seq(1,n()))
-    ) %>%
-    dplyr::ungroup()
+      name = seq_len(dplyr::n())
+    ) |>
+    dplyr::ungroup() |>
+    as.data.frame()
 
-  test <- tidyr::pivot_wider(test, names_from = name, values_from = c(topID, topName))
+  test <- test[order(test$botID, test$name), , drop = FALSE]
+  test <- stats::reshape(
+    test,
+    idvar = "botID",
+    timevar = "name",
+    direction = "wide"
+  )
+  row.names(test) <- NULL
+
+  expected_cols <- c("botID", "topID.1", "topID.2", "topName.1", "topName.2")
+  if (!all(expected_cols %in% names(test))) {
+    stop("Unexpected overlap structure: expected exactly two top-level matches per lower-level cluster.")
+  }
+  test <- test[, expected_cols, drop = FALSE]
 
   # Redefine the Column names of the output, based on the supplied case:
   botID <- switch(
